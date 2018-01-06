@@ -305,6 +305,9 @@ namespace MyAutoIt
                     }
                     mask[i].color = Color.FromArgb((byte)(r / fvs.Count), (byte)(g / fvs.Count), (byte)(b / fvs.Count));
                 }
+            }else
+            {
+                Console.WriteLine("ERROR: mask.png not found");
             }
             return mask;
         }

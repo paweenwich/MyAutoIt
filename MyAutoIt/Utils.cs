@@ -562,8 +562,26 @@ namespace MyAutoIt
 
         public static String AdbExec(String command)
         {
+            string[] adbs = {
+                @"C:\Users\Administrator\AppData\Local\Android\sdk\platform-tools\adb.exe",
+                @"C:\adb\adb.exe",
+            };
             System.Diagnostics.Process process = new System.Diagnostics.Process();
-            process.StartInfo.FileName = @"C:\Users\Administrator\AppData\Local\Android\sdk\platform-tools\adb.exe";
+            process.StartInfo.FileName = "";
+            for (int i=0;i< adbs.Length; i++)
+            {
+                if (File.Exists(adbs[i]))
+                {
+                    process.StartInfo.FileName = adbs[i];
+                }
+            }
+            if(process.StartInfo.FileName == "")
+            {
+                Console.WriteLine("ERROR: adb.exe not found for [{0}]",command);
+                return "adb.exe not found";
+            }
+            //process.StartInfo.FileName = @"C:\Users\Administrator\AppData\Local\Android\sdk\platform-tools\adb.exe";
+
             if (ADBDevice != "")
             {
                 process.StartInfo.Arguments = "-s " + ADBDevice + " " + command;
