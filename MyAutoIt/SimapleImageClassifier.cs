@@ -210,11 +210,11 @@ namespace MyAutoIt
                 }
             }
             main = ret.ToBitmap(main);
-            main.Save(@"D:\Data\Linage2\diff.png");
+            //main.Save(@"D:\Data\Linage2\diff.png");
             ret = AverageFeature(folder, main);
             if (ret != null)
             {
-                ret.ToBitmap(main).Save(@"D:\Data\Linage2\avg.png");
+                //ret.ToBitmap(main).Save(@"D:\Data\Linage2\avg.png");
             }
             return ret;
         }
