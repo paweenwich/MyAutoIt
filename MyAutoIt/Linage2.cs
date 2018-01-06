@@ -434,7 +434,7 @@ namespace MyAutoIt
                 Utils.SetForegroundWindow(Utils.lastHwnd);
                 Thread.Sleep(1000);
                 Utils.MouseClick("LEFT", rect.left + autoClickPoints[screenType].X, rect.top + autoClickPoints[screenType].Y);*/
-                Console.WriteLine("AutoClick {}", screenType);
+                Console.WriteLine("AutoClick {0}", screenType);
                 Utils.AdbMouseClick((int) autoClickPoints[screenType].X,(int) autoClickPoints[screenType].Y);
             }
         }
