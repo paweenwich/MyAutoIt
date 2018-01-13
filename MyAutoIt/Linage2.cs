@@ -26,7 +26,7 @@ namespace MyAutoIt
     {
         public String dataPath; // = @"D:\Data\Linage2\";
         public String[] windowName = {"BlueStacks", "Bluestacks" };
-        public String className = "BlueStacksApp";
+        //public String className = "BlueStacksApp";
         public String autoClickPointsFileName = "autoClickPoints.txt";
         public String clickPointsFileName = "clickPoints.txt";
         
@@ -138,7 +138,11 @@ namespace MyAutoIt
 
         public void ActiveBlueStackWindow()
         {
-            Utils.SearchWindow("BlueStacks App Player", true);
+            IntPtr hwnd = Utils.GetWindowHandleByProcessName(windowName);
+            if (hwnd != IntPtr.Zero)
+            {
+                Utils.SetForegroundWindow(hwnd);
+            }
         }
 
         public bool CorrectScreenSize()
@@ -187,11 +191,7 @@ namespace MyAutoIt
                 Console.WriteLine(p);
             }
 
-            IntPtr hwnd = Utils.GetWindowHandleByProcessName(windowName);
-            if (hwnd != IntPtr.Zero)
-            {
-                Utils.SetForegroundWindow(hwnd);
-            }
+            ActiveBlueStackWindow();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -446,10 +446,7 @@ namespace MyAutoIt
                 case "Dead":
                 case "ClearDungeon":
                     {
-                        IntPtr hwnd = Utils.GetWindowHandleByProcessName(windowName);
-                        if (hwnd != IntPtr.Zero) { 
-                            Utils.SetForegroundWindow(hwnd);
-                        }
+                        ActiveBlueStackWindow();
                     }
                 break;
             }
