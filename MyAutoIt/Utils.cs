@@ -436,15 +436,24 @@ namespace MyAutoIt
         public static Bitmap CaptureApplication(String procName)
         {
             var proc = Process.GetProcessesByName(procName)[0];
-            IntPtr hwnd = GetWindowHandleByProcessName(procName);
+            IntPtr hwnd = GetWindowHandleByProcessName(new String[] { procName });
             lastHwnd = hwnd;
             return PrintWindow(hwnd);
         }
 
-        public static IntPtr GetWindowHandleByProcessName(String procName)
+        public static IntPtr GetWindowHandleByProcessName(String[] procNames)
         {
-            var proc = Process.GetProcessesByName(procName)[0];
-            return proc.MainWindowHandle;
+            foreach (String procName in procNames)
+            {
+                foreach (Process p in Process.GetProcessesByName(procName))
+                {
+                    if (p.MainWindowHandle != IntPtr.Zero)
+                    {
+                        return p.MainWindowHandle;
+                    }
+                }
+            }
+            return IntPtr.Zero;
         }
 
         public static IntPtr GetWindowHandleByClassName(String className)

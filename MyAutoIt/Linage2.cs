@@ -25,7 +25,7 @@ namespace MyAutoIt
 
     {
         public String dataPath; // = @"D:\Data\Linage2\";
-        public String windowName = "BlueStacks";
+        public String[] windowName = {"BlueStacks", "Bluestacks" };
         public String className = "BlueStacksApp";
         public String autoClickPointsFileName = "autoClickPoints.txt";
         public String clickPointsFileName = "clickPoints.txt";
@@ -143,23 +143,6 @@ namespace MyAutoIt
 
         public bool CorrectScreenSize()
         {
-            /*
-            IntPtr hwnd = Utils.GetWindowHandleByProcessName(windowName);
-            if (hwnd != IntPtr.Zero)
-            {
-                Utils.RECT rect;
-                Utils.GetWindowRect(hwnd, out rect);
-                if ((rect.Width != screenSize.Width) || (rect.Height != screenSize.Height))
-                {
-                    Utils.SetWindowPos(hwnd, 0, rect.left, rect.top, screenSize.Width, screenSize.Height, Utils.SWP_NOZORDER | Utils.SWP_SHOWWINDOW);
-                    logDebug("CorrectScreenSize() from " + rect.Width + " " + rect.Height);
-                    CorrectScreenSize();// from 1139 641
-                    return false;
-                }
-                return true;
-            }
-            return false;
-            */
             return true;
         }
 
@@ -177,7 +160,7 @@ namespace MyAutoIt
 
         public void TestWhiteStack()
         {
-            Process proc = Process.GetProcessesByName(windowName)[0];
+            Process proc = Process.GetProcessesByName(windowName[0])[0];
             TestStack.White.Application app = TestStack.White.Application.Attach(proc);
             /*List<Window> windows = app.GetWindows();
             foreach(Window w in windows)
@@ -198,11 +181,16 @@ namespace MyAutoIt
         {
             //Utils.AdbScroll(100,400,100,240);
             //logDebug("Button1 Click1 ");
-            Dictionary<String,String> ret=  Utils.AdbListDevice();
-            cmbADBDevice.Items.Clear();
-            foreach(String s in ret.Keys)
+            Process[] proc = Process.GetProcesses();
+            foreach(Process p in proc)
             {
-                cmbADBDevice.Items.Add(new ComboDeviceItem(s,ret[s]));
+                Console.WriteLine(p);
+            }
+
+            IntPtr hwnd = Utils.GetWindowHandleByProcessName(windowName);
+            if (hwnd != IntPtr.Zero)
+            {
+                Utils.SetForegroundWindow(hwnd);
             }
         }
 
@@ -221,7 +209,7 @@ namespace MyAutoIt
 
 
                 BlackMagic bm = new BlackMagic();
-                if (bm.OpenProcessAndThread(SProcess.GetProcessFromProcessName(windowName)))
+                if (bm.OpenProcessAndThread(SProcess.GetProcessFromProcessName(windowName[0])))
                 {
                     logDebug("Found");
                     Utils.MEMORY_BASIC_INFORMATION mem_basic_info = new Utils.MEMORY_BASIC_INFORMATION();
