@@ -151,12 +151,21 @@ namespace MyAutoIt
         public ClassifyResult Classify(Bitmap bmp,double minScore=0.60)
         {
             double bestMatchScore = 0;
-            String bestKey = "";
+            ClassifyResult bestResult = null;
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
             classifyDetail.Clear();
-            foreach (String key in features.Keys)
+            ClassifyResult[] results = Classifies(bmp, minScore);
+            foreach(ClassifyResult result in results)
+            {
+                if(result.score> bestMatchScore)
+                {
+                    bestMatchScore = result.score;
+                    bestResult = result;
+                }
+            }
+            /*foreach (String key in features.Keys)
             {
                 ImageFeatureVector fv = features[key];
                 double score = fv.Match(bmp);
@@ -166,22 +175,35 @@ namespace MyAutoIt
                     bestMatchScore = score;
                     bestKey = key;
                 }
-            }
+            }*/
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
-            ClassifyResult ret = new ClassifyResult() { label = bestKey, score = bestMatchScore, evalTime = ts.TotalMilliseconds};
-            lastResult = ret;
-            if (bestMatchScore >= minScore)
+            if (bestResult != null)
             {
-                return ret;
+                bestResult.evalTime = ts.TotalMilliseconds;
             }
-            else
-            {
-                //Console.WriteLine("BestScore=" + ret.ToString());
-                return null;
-
-            }
+            return bestResult;
         }
+        public ClassifyResult[] Classifies(Bitmap bmp, double minScore = 0.60)
+        {
+            List<ClassifyResult> ret = new List<ClassifyResult>();
+            Stopwatch stopWatch = new Stopwatch();
+            classifyDetail.Clear();
+            foreach (String key in features.Keys)
+            {
+                ImageFeatureVector fv = features[key];
+                double score = fv.Match(bmp);
+                classifyDetail.Add(key, score);
+                if(score > minScore)
+                {
+
+                    ClassifyResult tmp = new ClassifyResult() { label = key, score = score, evalTime = 0};
+                    ret.Add(tmp);
+                }
+            }
+            return ret.ToArray();
+        }
+
         public ImageFeatureVector CreateFeatureVector(String folder)
         {
             ImageFeatureVector ret = null;
@@ -202,10 +224,13 @@ namespace MyAutoIt
                     {
                         main = DiffBitmap(main, bmp);
                         ret = new ImageFeatureVector();
-                        ret.LoadFromDiffBitmap(main,new Rectangle(new Point(85,30),new Size(main.Width-85,main.Height-30)));
-                    }else
+                        //ret.LoadFromDiffBitmap(main,new Rectangle(new Point(85,30),new Size(main.Width-85,main.Height-30)));
+                        ret.LoadFromDiffBitmap(main, new Rectangle(new Point(0,0), new Size(main.Width, main.Height)));
+                    }
+                    else
                     {
-                        ret = ret.ApplyBitmap(bmp, new Rectangle(new Point(85, 30), new Size(main.Width-85, main.Height-30)));
+                        //ret = ret.ApplyBitmap(bmp, new Rectangle(new Point(85, 30), new Size(main.Width-85, main.Height-30)));
+                        ret = ret.ApplyBitmap(bmp, new Rectangle(new Point(0,0), new Size(main.Width, main.Height)));
                     }
                 }
             }

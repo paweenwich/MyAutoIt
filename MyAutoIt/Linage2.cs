@@ -316,11 +316,14 @@ namespace MyAutoIt
                         {
                             String screenType = result.label;
                             txtScreenStatus.Text = result.ToString() + " " + bmp.Size.ToString();
+                            //string s = string.Join(";", screenClassifier.classifyDetail.Select(x => x.Key + "=" + x.Value).ToArray());
+                            //Console.WriteLine(s);
                             // check if we have sub type
                             if (screenClassifiers.ContainsKey(screenType))
                             {
                                 SimpleImageClassifier subScreenClassifier = screenClassifiers[screenType];
                                 ClassifyResult subResult = subScreenClassifier.Classify(bmp, 0.9);
+                                ClassifyResult[] subResults = subScreenClassifier.Classifies(bmp, 0.9);
                                 if (subResult != null)
                                 {
                                     txtScreenStatus.Text = result.ToString() + "/" + subResult.ToString();
@@ -329,6 +332,10 @@ namespace MyAutoIt
                                 else
                                 {
                                     onScreenType(screenType);
+                                }
+                                if (subResults.Length > 0)
+                                {
+                                    Console.WriteLine(string.Join(",", subResults.Select(x => x.label).ToArray()));
                                 }
                             }
                             else
