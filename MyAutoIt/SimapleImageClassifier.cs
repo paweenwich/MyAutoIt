@@ -292,7 +292,7 @@ namespace MyAutoIt
                 ClassifyResult result = Classify(bmp, level);
                 if ((result == null)||(result.label != name))
                 {
-                    Console.WriteLine("Fail: " + file.FullName + " " + lastResult.ToString());
+                    Console.WriteLine("Fail: " + file.FullName);
                 }
             }
         }

@@ -331,6 +331,7 @@ namespace MyAutoIt
                                 }
                                 else
                                 {
+                                    txtScreenStatus.Text = result.ToString();
                                     onScreenType(screenType);
                                 }
                                 if (subResults.Length > 0)
@@ -340,14 +341,16 @@ namespace MyAutoIt
                             }
                             else
                             {
+                                txtScreenStatus.Text = result.ToString();
                                 onScreenType(screenType);
                             }
                         }
                         else
                         {
+                            //txtScreenStatus.Text = "";
                             //String savefileName = dataPath + @"Unknown\" + Path.GetRandomFileName().Replace(".", "") + ".png";
                             //bmp.Save(savefileName);
-                            //txtScreenStatus.Text = "Unknown" + " " + bmp.Size.ToString() + " bestmatch=" + screenClassifier.lastResult.ToString();
+                            txtScreenStatus.Text = "Unknown" + " " + bmp.Size.ToString() ;
                         }
                     }
                 }
