@@ -117,6 +117,15 @@
     <Reference Include="fasmdll_managed">
       <HintPath>..\..\Blackmagic-master\BlackMagic\bin\Debug\fasmdll_managed.dll</HintPath>
     </Reference>
+    <Reference Include="KopiLua">
+      <HintPath>lib\KopiLua.dll</HintPath>
+    </Reference>
+    <Reference Include="KopiLuaDll">
+      <HintPath>lib\KopiLuaDll.dll</HintPath>
+    </Reference>
+    <Reference Include="KopiLuaInterface">
+      <HintPath>lib\KopiLuaInterface.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Identity.Client, Version=1.1.0.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Identity.Client.1.1.0-preview\lib\net45\Microsoft.Identity.Client.dll</HintPath>
       <Private>True</Private>

@@ -18,6 +18,7 @@ using Accord.Imaging;
 using Accord.MachineLearning.VectorMachines.Learning;
 using Accord.Statistics.Kernels;
 using Accord.Math.Optimization.Losses;
+using LuaInterface;
 
 namespace MyAutoIt
 {
@@ -40,6 +41,8 @@ namespace MyAutoIt
         public Dictionary<String, SimpleImageClassifier> screenClassifiers = new Dictionary<string, SimpleImageClassifier>();
         public Dictionary<String, System.Drawing.Point> autoClickPoints = new Dictionary<String, System.Drawing.Point>();
         public Dictionary<String, System.Drawing.Point> clickPoints = new Dictionary<String, System.Drawing.Point>();
+        // Lua
+        public Lua lua;
         public Linage2()
         {
             InitializeComponent();
@@ -49,8 +52,10 @@ namespace MyAutoIt
         }
         public void Reload()
         {
+
             logClear();
             logDebug("Reload");
+            LoadScript();
             LoadComboBox();
             LoadFeatures();
             LoadAutoPoints();
@@ -63,6 +68,22 @@ namespace MyAutoIt
                 cmbADBDevice.Items.Add(new ComboDeviceItem(s, ret[s]));
                 Console.WriteLine("Add ADB Device " + ret[s]);
             }
+        }
+        public void LoadScript()
+        {
+            String lua_script_path = Application.StartupPath + @"\Script\";
+            lua = new Lua();
+            lua["script_path"] = lua_script_path;
+            lua["bot"] = this;
+            Console.WriteLine("Loading Main.lua...");
+            try
+            {
+                lua.DoFile(lua_script_path + "Main.lua");
+            }catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            Console.WriteLine("Done");
         }
         public SimpleImageClassifier LoadFeaturesFromDir(String featureDir)
         {
@@ -300,6 +321,7 @@ namespace MyAutoIt
 
         private void timer2_Tick(object sender, EventArgs e)
         {
+            lua.DoString("if Auto ~= nil then Auto() end");
             if (CorrectScreenSize())
             {
                 if (btnScreenCheck.Text == "ScreenCheck Stop")
@@ -621,6 +643,11 @@ namespace MyAutoIt
                 Utils.ADBDevice = c.deviceName;
                 Console.WriteLine("Device=" + Utils.ADBDevice);
             }
+        }
+
+        public void log(string data)
+        {
+            Console.WriteLine(data);
         }
     }
 
