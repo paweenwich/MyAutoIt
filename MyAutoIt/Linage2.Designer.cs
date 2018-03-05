@@ -52,6 +52,7 @@
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.cmbADBDevice = new System.Windows.Forms.ComboBox();
+            this.reloadScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -158,7 +159,8 @@
             // utilsToolStripMenuItem
             // 
             this.utilsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.reloadToolStripMenuItem});
+            this.reloadToolStripMenuItem,
+            this.reloadScriptToolStripMenuItem});
             this.utilsToolStripMenuItem.Name = "utilsToolStripMenuItem";
             this.utilsToolStripMenuItem.Size = new System.Drawing.Size(50, 24);
             this.utilsToolStripMenuItem.Text = "Utils";
@@ -166,7 +168,7 @@
             // reloadToolStripMenuItem
             // 
             this.reloadToolStripMenuItem.Name = "reloadToolStripMenuItem";
-            this.reloadToolStripMenuItem.Size = new System.Drawing.Size(131, 26);
+            this.reloadToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.reloadToolStripMenuItem.Text = "Reload";
             this.reloadToolStripMenuItem.Click += new System.EventHandler(this.reloadToolStripMenuItem_Click);
             // 
@@ -272,6 +274,13 @@
             this.cmbADBDevice.TabIndex = 13;
             this.cmbADBDevice.SelectedIndexChanged += new System.EventHandler(this.cmbADBDevice_SelectedIndexChanged);
             // 
+            // reloadScriptToolStripMenuItem
+            // 
+            this.reloadScriptToolStripMenuItem.Name = "reloadScriptToolStripMenuItem";
+            this.reloadScriptToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.reloadScriptToolStripMenuItem.Text = "Reload Script";
+            this.reloadScriptToolStripMenuItem.Click += new System.EventHandler(this.reloadScriptToolStripMenuItem_Click);
+            // 
             // Linage2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -327,5 +336,6 @@
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.ComboBox cmbADBDevice;
+        private System.Windows.Forms.ToolStripMenuItem reloadScriptToolStripMenuItem;
     }
 }

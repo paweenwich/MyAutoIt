@@ -85,6 +85,17 @@ namespace MyAutoIt
             }
             Console.WriteLine("Done");
         }
+        public void ExecScript(String cmd)
+        {
+            try
+            {
+                lua.DoString(cmd);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
         public SimpleImageClassifier LoadFeaturesFromDir(String featureDir)
         {
             logDebug("LoadFeaturesFromDir " + featureDir);
@@ -321,7 +332,6 @@ namespace MyAutoIt
 
         private void timer2_Tick(object sender, EventArgs e)
         {
-            lua.DoString("if Auto ~= nil then Auto() end");
             if (CorrectScreenSize())
             {
                 if (btnScreenCheck.Text == "ScreenCheck Stop")
@@ -338,10 +348,12 @@ namespace MyAutoIt
                         {
                             String screenType = result.label;
                             txtScreenStatus.Text = result.ToString() + " " + bmp.Size.ToString();
-                            //string s = string.Join(";", screenClassifier.classifyDetail.Select(x => x.Key + "=" + x.Value).ToArray());
-                            //Console.WriteLine(s);
-                            // check if we have sub type
-                            if (screenClassifiers.ContainsKey(screenType))
+
+                            lua["classifyResult"] = result;
+                            lua["currentBitMap"] = bmp;
+                            ExecScript("if Auto ~= nil then Auto() end");
+
+                            /*if (screenClassifiers.ContainsKey(screenType))
                             {
                                 SimpleImageClassifier subScreenClassifier = screenClassifiers[screenType];
                                 ClassifyResult subResult = subScreenClassifier.Classify(bmp, 0.9);
@@ -365,7 +377,7 @@ namespace MyAutoIt
                             {
                                 txtScreenStatus.Text = result.ToString();
                                 onScreenType(screenType);
-                            }
+                            }*/
                         }
                         else
                         {
@@ -457,6 +469,11 @@ namespace MyAutoIt
                 Console.WriteLine("AutoClick {0}", screenType);
                 Utils.AdbMouseClick((int) autoClickPoints[screenType].X,(int) autoClickPoints[screenType].Y);
             }
+        }
+
+        public void ClickAt(int x,int y)
+        {
+            Utils.AdbMouseClick(x,y);
         }
 
         public void onScreenType(String screenType,String subScreenType = "")
@@ -648,6 +665,12 @@ namespace MyAutoIt
         public void log(string data)
         {
             Console.WriteLine(data);
+        }
+
+        private void reloadScriptToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            txtDebug.Clear();
+            LoadScript();
         }
     }
 
