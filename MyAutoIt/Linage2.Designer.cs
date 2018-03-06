@@ -41,20 +41,26 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.utilsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reloadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reloadScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.featuresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.verifyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.averageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAutoPointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addTaskToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.txtDebug = new System.Windows.Forms.RichTextBox();
             this.chkAutoClick = new System.Windows.Forms.CheckBox();
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.cmbADBDevice = new System.Windows.Forms.ComboBox();
-            this.reloadScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.lstTask = new System.Windows.Forms.ListBox();
+            this.txtInput = new System.Windows.Forms.TextBox();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -125,16 +131,16 @@
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.txtScreenStatus});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 457);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 516);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(808, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(806, 22);
             this.statusStrip1.TabIndex = 5;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // txtScreenStatus
             // 
             this.txtScreenStatus.Name = "txtScreenStatus";
-            this.txtScreenStatus.Size = new System.Drawing.Size(793, 17);
+            this.txtScreenStatus.Size = new System.Drawing.Size(791, 17);
             this.txtScreenStatus.Spring = true;
             this.txtScreenStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -149,10 +155,11 @@
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.utilsToolStripMenuItem,
-            this.featuresToolStripMenuItem});
+            this.featuresToolStripMenuItem,
+            this.debugToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(808, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(806, 28);
             this.menuStrip1.TabIndex = 7;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -168,9 +175,16 @@
             // reloadToolStripMenuItem
             // 
             this.reloadToolStripMenuItem.Name = "reloadToolStripMenuItem";
-            this.reloadToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.reloadToolStripMenuItem.Size = new System.Drawing.Size(173, 26);
             this.reloadToolStripMenuItem.Text = "Reload";
             this.reloadToolStripMenuItem.Click += new System.EventHandler(this.reloadToolStripMenuItem_Click);
+            // 
+            // reloadScriptToolStripMenuItem
+            // 
+            this.reloadScriptToolStripMenuItem.Name = "reloadScriptToolStripMenuItem";
+            this.reloadScriptToolStripMenuItem.Size = new System.Drawing.Size(173, 26);
+            this.reloadScriptToolStripMenuItem.Text = "Reload Script";
+            this.reloadScriptToolStripMenuItem.Click += new System.EventHandler(this.reloadScriptToolStripMenuItem_Click);
             // 
             // featuresToolStripMenuItem
             // 
@@ -211,6 +225,21 @@
             this.saveAutoPointsToolStripMenuItem.Text = "Save AutoPoints";
             this.saveAutoPointsToolStripMenuItem.Click += new System.EventHandler(this.saveAutoPointsToolStripMenuItem_Click);
             // 
+            // debugToolStripMenuItem
+            // 
+            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addTaskToolStripMenuItem});
+            this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
+            this.debugToolStripMenuItem.Size = new System.Drawing.Size(66, 24);
+            this.debugToolStripMenuItem.Text = "Debug";
+            // 
+            // addTaskToolStripMenuItem
+            // 
+            this.addTaskToolStripMenuItem.Name = "addTaskToolStripMenuItem";
+            this.addTaskToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.addTaskToolStripMenuItem.Text = "AddTask";
+            this.addTaskToolStripMenuItem.Click += new System.EventHandler(this.addTaskToolStripMenuItem_Click);
+            // 
             // txtDebug
             // 
             this.txtDebug.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -219,7 +248,7 @@
             this.txtDebug.Font = new System.Drawing.Font("Courier New", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtDebug.Location = new System.Drawing.Point(7, 95);
             this.txtDebug.Name = "txtDebug";
-            this.txtDebug.Size = new System.Drawing.Size(789, 359);
+            this.txtDebug.Size = new System.Drawing.Size(631, 418);
             this.txtDebug.TabIndex = 8;
             this.txtDebug.Text = "";
             // 
@@ -268,24 +297,46 @@
             // cmbADBDevice
             // 
             this.cmbADBDevice.FormattingEnabled = true;
-            this.cmbADBDevice.Location = new System.Drawing.Point(554, 36);
+            this.cmbADBDevice.Location = new System.Drawing.Point(412, 65);
             this.cmbADBDevice.Name = "cmbADBDevice";
-            this.cmbADBDevice.Size = new System.Drawing.Size(242, 24);
+            this.cmbADBDevice.Size = new System.Drawing.Size(136, 24);
             this.cmbADBDevice.TabIndex = 13;
             this.cmbADBDevice.SelectedIndexChanged += new System.EventHandler(this.cmbADBDevice_SelectedIndexChanged);
             // 
-            // reloadScriptToolStripMenuItem
+            // panel1
             // 
-            this.reloadScriptToolStripMenuItem.Name = "reloadScriptToolStripMenuItem";
-            this.reloadScriptToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.reloadScriptToolStripMenuItem.Text = "Reload Script";
-            this.reloadScriptToolStripMenuItem.Click += new System.EventHandler(this.reloadScriptToolStripMenuItem_Click);
+            this.panel1.Controls.Add(this.txtInput);
+            this.panel1.Controls.Add(this.lstTask);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel1.Location = new System.Drawing.Point(644, 28);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(162, 488);
+            this.panel1.TabIndex = 14;
+            // 
+            // lstTask
+            // 
+            this.lstTask.FormattingEnabled = true;
+            this.lstTask.ItemHeight = 16;
+            this.lstTask.Location = new System.Drawing.Point(3, 3);
+            this.lstTask.Name = "lstTask";
+            this.lstTask.Size = new System.Drawing.Size(156, 196);
+            this.lstTask.TabIndex = 15;
+            // 
+            // txtInput
+            // 
+            this.txtInput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtInput.Location = new System.Drawing.Point(3, 463);
+            this.txtInput.Name = "txtInput";
+            this.txtInput.Size = new System.Drawing.Size(156, 22);
+            this.txtInput.TabIndex = 16;
+            this.txtInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtInput_KeyDown);
             // 
             // Linage2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(808, 479);
+            this.ClientSize = new System.Drawing.Size(806, 538);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.cmbADBDevice);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
@@ -306,6 +357,8 @@
             this.statusStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -337,5 +390,10 @@
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.ComboBox cmbADBDevice;
         private System.Windows.Forms.ToolStripMenuItem reloadScriptToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem debugToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addTaskToolStripMenuItem;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.TextBox txtInput;
+        private System.Windows.Forms.ListBox lstTask;
     }
 }

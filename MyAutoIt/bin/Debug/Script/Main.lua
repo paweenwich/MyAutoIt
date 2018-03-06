@@ -1,6 +1,24 @@
+Environment = luanet.import_type 'System.Environment'
+
 function ClickAt(tab)
     bot:log("ClickAt " .. tab.x .. "," .. tab.y);
     bot:ClickAt(tab.x,tab.y);
+end;
+
+function ProcessTask()
+    local now = Environment.TickCount;
+    --bot:log();
+    bot.lstTask:RefreshItems();
+    for i=0, bot.lstTask.Items.Count -1 do
+        local item = bot.lstTask.Items[i];
+        if now > item.execTime then
+            local f = loadstring(item.script);
+            f();
+            bot.lstTask.Items:RemoveAt(i);
+            return true
+        end;
+    end;
+    return false;
 end;
 
 
@@ -22,7 +40,7 @@ function Auto()
             screen:cmd();
         end;
     end;
-    
+    bot.txtDebug:ScrollToCaret();
 end;
 
 function GetStateTable(state,screen)
@@ -34,14 +52,6 @@ function GetStateTable(state,screen)
     end;
     return nil;
 end;
-
---[[
-{"QuestSkip":"1180, 510","QuestComplete":"634, 615","QuestDo":"763, 613","QuestAccept":"763, 613","Move":"511,519", "Dead":"1199,252", "PartyRequest":"900,56"
-, "WeeklyQuest/NoQuest":"1238,45","WeeklyQuest/DoQuest":"940,420","WeeklyQuest/QuestSuccess":"937,423","WeeklyQuest/MoveNow":"940,420","WeeklyQuest/NoQuest":"1242,40"
-, "Main/Success":"260,330","Main/Harvest":"689,262","Main/HarvestDone":"863,84","HarvestExit":"760,482","Main/PartyManual":"874,683","Main/PartyAutoNoSkill":"874,683"
-, "Main/Quest2":"52,312","QuestSelectB2":"564,222","QuestSelectB3":"700,222","QuestSelected":"850,600","QuestConfirm":"760,500"
-}
---]]    
 
 stateTable = {};
 stateTable["Auto"] = {

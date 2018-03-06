@@ -19,6 +19,7 @@ using Accord.MachineLearning.VectorMachines.Learning;
 using Accord.Statistics.Kernels;
 using Accord.Math.Optimization.Losses;
 using LuaInterface;
+using System.Threading.Tasks;
 
 namespace MyAutoIt
 {
@@ -43,6 +44,8 @@ namespace MyAutoIt
         public Dictionary<String, System.Drawing.Point> clickPoints = new Dictionary<String, System.Drawing.Point>();
         // Lua
         public Lua lua;
+        // ScriptTask
+        public List<ScriptTaskItem> scriptTasks = new List<ScriptTaskItem>();
         public Linage2()
         {
             InitializeComponent();
@@ -330,63 +333,52 @@ namespace MyAutoIt
 
         }
 
+        public Task<Bitmap> CaptureScreenAsync()
+        {
+            return Task.Run(() => CaptureScreen());
+        }
+
+        public Bitmap CaptureScreen()
+        {
+            String folder = dataPath + @"tmp\";
+            String tmpfileName = folder + Path.GetRandomFileName().Replace(".", "") + ".png";
+            Utils.AdbCpatureToFile(tmpfileName);
+            Bitmap bmp = Utils.LoadAndDeleteBitmap(tmpfileName);
+            return bmp;
+        }
+
         private void timer2_Tick(object sender, EventArgs e)
         {
+            ExecScript("if ProcessTask ~= nil then ProcessTask() end");
             if (CorrectScreenSize())
             {
                 if (btnScreenCheck.Text == "ScreenCheck Stop")
                 {
-                    //Bitmap bmp = Utils.CaptureApplication(windowName);
-                    String folder = dataPath + @"tmp\";
-                    String tmpfileName = folder + Path.GetRandomFileName().Replace(".", "") + ".png";
-                    Utils.AdbCpatureToFile(tmpfileName);
-                    Bitmap bmp = Utils.LoadAndDeleteBitmap(tmpfileName);
-                    if (bmp != null)
+                    Task<Bitmap> task = CaptureScreenAsync();
+                    var awaiter = task.GetAwaiter();
+                    awaiter.OnCompleted(() =>
                     {
-                        ClassifyResult result = screenClassifier.Classify(bmp, 0.9);
-                        if (result != null)
+                        timer2.Enabled = true;
+                        Bitmap bmp = awaiter.GetResult();
+                        if (bmp != null)
                         {
-                            String screenType = result.label;
-                            txtScreenStatus.Text = result.ToString() + " " + bmp.Size.ToString();
-
-                            lua["classifyResult"] = result;
-                            lua["currentBitMap"] = bmp;
-                            ExecScript("if Auto ~= nil then Auto() end");
-
-                            /*if (screenClassifiers.ContainsKey(screenType))
+                            ClassifyResult result = screenClassifier.Classify(bmp, 0.9);
+                            if (result != null)
                             {
-                                SimpleImageClassifier subScreenClassifier = screenClassifiers[screenType];
-                                ClassifyResult subResult = subScreenClassifier.Classify(bmp, 0.9);
-                                ClassifyResult[] subResults = subScreenClassifier.Classifies(bmp, 0.9);
-                                if (subResult != null)
-                                {
-                                    txtScreenStatus.Text = result.ToString() + "/" + subResult.ToString();
-                                    onScreenType(screenType, subResult.label);
-                                }
-                                else
-                                {
-                                    txtScreenStatus.Text = result.ToString();
-                                    onScreenType(screenType);
-                                }
-                                if (subResults.Length > 0)
-                                {
-                                    Console.WriteLine(string.Join(",", subResults.Select(x => x.label).ToArray()));
-                                }
+                                String screenType = result.label;
+                                txtScreenStatus.Text = result.ToString() + " " + bmp.Size.ToString();
+
+                                lua["classifyResult"] = result;
+                                lua["currentBitMap"] = bmp;
+                                ExecScript("if Auto ~= nil then Auto() end");
                             }
                             else
                             {
-                                txtScreenStatus.Text = result.ToString();
-                                onScreenType(screenType);
-                            }*/
+                                txtScreenStatus.Text = "Unknown" + " " + bmp.Size.ToString();
+                            }
                         }
-                        else
-                        {
-                            //txtScreenStatus.Text = "";
-                            //String savefileName = dataPath + @"Unknown\" + Path.GetRandomFileName().Replace(".", "") + ".png";
-                            //bmp.Save(savefileName);
-                            txtScreenStatus.Text = "Unknown" + " " + bmp.Size.ToString() ;
-                        }
-                    }
+                    });
+                    timer2.Enabled = false;
                 }
             }
         }
@@ -475,7 +467,7 @@ namespace MyAutoIt
         {
             Utils.AdbMouseClick(x,y);
         }
-
+        /*
         public void onScreenType(String screenType,String subScreenType = "")
         {
             if (chkAutoClick.Checked)
@@ -500,6 +492,7 @@ namespace MyAutoIt
                 break;
             }
         }
+        */
 
         private void saveAutoPointsToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -672,6 +665,29 @@ namespace MyAutoIt
             txtDebug.Clear();
             LoadScript();
         }
+
+        private void lstTask_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        public void AddTask(String cmd,long tick)
+        {
+            lstTask.Items.Add(new ScriptTaskItem(cmd,tick));
+        }
+
+        private void addTaskToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AddTask("bot:log('xxx')", Environment.TickCount + 1000);
+        }
+
+        private void txtInput_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return)
+            {
+                ExecScript(txtInput.Text);
+            }
+        }
     }
 
     public class ComboDeviceItem
@@ -688,4 +704,20 @@ namespace MyAutoIt
             return desc;
         }
     }
+
+    public class ScriptTaskItem
+    {
+        public String script;
+        public long execTime;
+        public ScriptTaskItem(String script,long time)
+        {
+            this.script = script;
+            this.execTime = time;
+        }
+        public override String ToString()
+        {
+            return script + " " + (execTime - Environment.TickCount);
+        }
+    }
+
 }
