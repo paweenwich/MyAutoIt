@@ -33,6 +33,11 @@ function onCanNotReset(tab)
     ClickAt(tab);
 end;
 
+function onNoMoreQuest(tab)
+    bot:log("onNoMoreQuest");
+    ClickAt(tab);
+end;
+
 function ProcessTask()
     local now = Environment.TickCount;
     --bot:log();
@@ -192,6 +197,7 @@ stateTable["AutoQuest"] = {
     {screen="Bag/questItem",cmd=onQuestItem,x=705,y=397},
     
     {screen="CanNotReset",cmd=onCanNotReset,x=635,y=485},    
+    {screen="NoMoreQuest",cmd=onNoMoreQuest,x=635,y=485},    
 
 };
 currentState = "Auto";
