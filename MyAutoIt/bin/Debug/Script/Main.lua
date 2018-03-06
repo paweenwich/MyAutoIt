@@ -1,4 +1,11 @@
 Environment = luanet.import_type 'System.Environment'
+function string.starts(String,Start)
+   return string.sub(String,1,string.len(Start))==Start
+end
+
+function string.ends(String,End)
+   return End=='' or string.sub(String,-string.len(End))==End
+end
 
 function ClickAt(tab)
     bot:log("ClickAt " .. tab.x .. "," .. tab.y);
@@ -11,8 +18,19 @@ function onDungeonClear(tab)
     bot:AddTask("bot:log('onDungeonClear')",3000);
 end;
 
-function onQuestItemDone(tab)
-    
+function onQuestItem(tab)
+    if noMoreQuest == true then
+        -- exit
+        Click("BagExit");
+        currentState = "Auto";
+    else
+        ClickAt(tab);
+    end;
+end;
+
+function onCanNotReset(tab)
+    noMoreQuest = true;
+    ClickAt(tab);
 end;
 
 function ProcessTask()
@@ -22,8 +40,10 @@ function ProcessTask()
     for i=0, bot.lstTask.Items.Count -1 do
         local item = bot.lstTask.Items[i];
         if now > item.execTime then
-            local f = loadstring(item.script);
-            if f() ~= true then
+            taskResult = false;
+            local f = loadstring("taskResult = " .. item.script);
+            f();
+            if taskResult ~= true then
                 bot.lstTask.Items:RemoveAt(i);
             end;
             return true
@@ -35,7 +55,7 @@ end;
 function Auto()
     if bot.chkAutoClick.Checked == true then
         -- bot:log(classifyResult:ToString());
-        local screenName = classifyResult.label;
+        screenName = classifyResult.label;
         local screens = stateTable[currentState];
         if bot.screenClassifiers:ContainsKey(screenName) == true then
             local subScreenClassifier = bot.screenClassifiers[screenName];
@@ -44,7 +64,8 @@ function Auto()
                 screenName = screenName .. "/" .. subResult.label;
             end;
         end;
-        bot:log("State " .. currentState .. ' ' .. screenName);
+        --bot:log("State " .. currentState .. ' ' .. screenName);
+        bot.txtScreenStatus.Text = "State " .. currentState .. ' ' .. screenName;
         local screen = GetStateTable(currentState,screenName);
         if screen ~= nil then
             screen:cmd();
@@ -61,6 +82,37 @@ function GetStateTable(state,screen)
         end;
     end;
     return nil;
+end;
+
+function MainClick(name)
+    -- make sure that current is main and click
+    if screenName ~= nil then
+        bot:log("MainClick: " .. screenName);
+        if string.starts(screenName,"Main") then
+        --if screenName == "Main" then 
+            Click(name)
+            return false;
+        end;
+    end;
+    -- continue     
+    return true;
+end;
+
+function AutoQuest()
+    currentState = "AutoQuest";
+    bot:AddTask("MainClick('Bag')",0);
+end;
+
+clickPoint = {};
+clickPoint["Bag"] = {x=984,y=34};
+clickPoint["BagExit"] = {x=1242,y=38};
+
+
+function Click(name)
+    if clickPoint[name] ~= nil then
+        local tab = clickPoint[name];
+        bot:ClickAt(tab.x,tab.y);
+    end;
 end;
 
 stateTable = {};
@@ -95,6 +147,12 @@ stateTable["Auto"] = {
     {screen="Main/HarvestDone",cmd=ClickAt,x=863,y=84},
     {screen="Main/PartyAutoNoSkill",cmd=ClickAt,x=874,y=683},
     {screen="Main/Quest2",cmd=ClickAt,x=52,y=312},
+    
+    {screen="Login",cmd=ClickAt,x=625,y=610},
+    {screen="Ads",cmd=ClickAt,x=1257,y=21},
+    {screen="CharSelect",cmd=ClickAt,x=1079,y=647},
+    
+    {screen="CanNotReset",cmd=onCanNotReset,x=635,y=485},    
 };
 
 stateTable["AutoQuest"] = {
@@ -131,7 +189,10 @@ stateTable["AutoQuest"] = {
     
     {screen="Bag",cmd=ClickAt,x=1145,y=130},
     {screen="Bag/item3",cmd=ClickAt,x=833,y=471},
-    {screen="Bag/questItem",cmd=ClickAt,x=705,y=397},
+    {screen="Bag/questItem",cmd=onQuestItem,x=705,y=397},
+    
+    {screen="CanNotReset",cmd=onCanNotReset,x=635,y=485},    
+
 };
 currentState = "Auto";
 

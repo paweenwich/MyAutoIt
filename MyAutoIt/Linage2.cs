@@ -366,7 +366,7 @@ namespace MyAutoIt
                             if (result != null)
                             {
                                 String screenType = result.label;
-                                txtScreenStatus.Text = result.ToString() + " " + bmp.Size.ToString();
+                                //txtScreenStatus.Text = result.ToString() + " " + bmp.Size.ToString();
 
                                 lua["classifyResult"] = result;
                                 lua["currentBitMap"] = bmp;
@@ -687,6 +687,11 @@ namespace MyAutoIt
             {
                 ExecScript(txtInput.Text);
             }
+        }
+
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            lstTask.Items.Clear();
         }
     }
 
