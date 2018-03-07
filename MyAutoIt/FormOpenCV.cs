@@ -14,6 +14,7 @@ using Emgu.CV.UI;
 using Emgu.CV.Features2D;
 using Emgu.CV.Util;
 using Emgu.CV.Flann;
+using Emgu.CV.XFeatures2D;
 
 namespace MyAutoIt
 {
@@ -39,7 +40,7 @@ namespace MyAutoIt
             bmpModel = modelImage.Bitmap;
             Mat testImage = CvInvoke.Imread(@"Linage2\Main\PartyAuto\2e35av2fwbk.png", ImreadModes.Color);
             UMat uModelImage = modelImage.GetUMat(AccessType.Read);
-            KAZE featureDetector = new KAZE();
+            var featureDetector = new SIFT();
             Mat modelDescriptors = new Mat();
             VectorOfKeyPoint modelKeyPoints = new VectorOfKeyPoint();
             VectorOfKeyPoint observedKeyPoints = new VectorOfKeyPoint();
@@ -75,11 +76,14 @@ namespace MyAutoIt
                         homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(modelKeyPoints, observedKeyPoints, matches, mask, 2);
                     }
                     Mat result = new Mat();
-                    Features2DToolbox.DrawKeypoints(modelImage, modelKeyPoints, result, new Bgr(Color.Red));
+                    //Features2DToolbox.DrawKeypoints(modelImage, modelKeyPoints, result, new Bgr(Color.Red));
+                    //Features2DToolbox.DrawKeypoints(testImage, observedKeyPoints, result, new Bgr(Color.Red));
+                    Features2DToolbox.DrawMatches(modelImage, modelKeyPoints, testImage, observedKeyPoints, matches, result,
+                        new MCvScalar(255, 0, 0), new MCvScalar(0, 255, 0));
                     bmp2 = result.Bitmap;
                 }
             }
-            log("Done");
+            log("Done " + mask.Size);
             
             Refresh();
         }
@@ -89,14 +93,12 @@ namespace MyAutoIt
             System.Drawing.Graphics g = this.CreateGraphics();
             if (bmpModel != null)
             {
-                g.DrawImage(bmpModel, new Point(100, 100));
+                g.DrawImage(bmpModel, new Point(0,50));
             }
             if (bmp2 != null)
             {
-                g.DrawImage(bmp2, new Point(100,200));
+                g.DrawImage(bmp2, new Point(0,100));
             }
-            Pen myPen = new Pen(System.Drawing.Color.Red, 5);
-            g.DrawLine(myPen, new Point(0, 0), new Point(100, 100));
             //Refresh();
         }
     }
