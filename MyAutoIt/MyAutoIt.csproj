@@ -114,6 +114,15 @@
       <HintPath>..\packages\DotImaging.Primitives2D.2.5.3\lib\net45\DotImaging.Primitives2D.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Emgu.CV.UI">
+      <HintPath>lib\Emgu.CV.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="Emgu.CV.UI.GL">
+      <HintPath>lib\Emgu.CV.UI.GL.dll</HintPath>
+    </Reference>
+    <Reference Include="Emgu.CV.World">
+      <HintPath>lib\Emgu.CV.World.dll</HintPath>
+    </Reference>
     <Reference Include="fasmdll_managed">
       <HintPath>..\..\Blackmagic-master\BlackMagic\bin\Debug\fasmdll_managed.dll</HintPath>
     </Reference>
@@ -168,6 +177,12 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormOpenCV.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormOpenCV.Designer.cs">
+      <DependentUpon>FormOpenCV.cs</DependentUpon>
+    </Compile>
     <Compile Include="Linage2.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -185,6 +200,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormOpenCV.resx">
+      <DependentUpon>FormOpenCV.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Linage2.resx">
       <DependentUpon>Linage2.cs</DependentUpon>

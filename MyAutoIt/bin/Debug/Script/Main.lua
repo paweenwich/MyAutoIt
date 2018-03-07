@@ -90,6 +90,10 @@ function AutoQuest()
     currentState = "AutoQuest";
     if noMoreQuest == true then
         bot:log("Finish All Quest Item");
+        if noMoreWeeklyQuest == true then
+            bot:log("Finish All Weekley Quest");
+            return;
+        end;
         -- check weekly quest
         Click("Quest");
         return;
@@ -131,11 +135,15 @@ stateTable["Auto"] = {
 
 
     
-    {screen="WeeklyQuest/NoQuest",cmd=ClickAt,x=1238,y=45},
     {screen="WeeklyQuest/DoQuest",cmd=ClickAt,x=940,y=420},
     {screen="WeeklyQuest/QuestSuccess",cmd=ClickAt,x=937,y=423},
     {screen="WeeklyQuest/MoveNow",cmd=ClickAt,x=940,y=420},
-    {screen="WeeklyQuest/NoQuest",cmd=ClickAt,x=1242,y=40},
+    {screen="WeeklyQuest/NoQuest",
+        cmd=function(tab)
+            noMoreWeeklyQuest = true;
+            ClickAt(tab);
+        end,
+    x=1242,y=40},
     
     {screen="Main/Success",cmd=ClickAt,x=260,y=330},
     {screen="Main/Harvest",cmd=ClickAt,x=689,y=262},
@@ -151,28 +159,6 @@ stateTable["Auto"] = {
 };
 
 stateTable["AutoQuest"] = {
---    {screen="QuestSkip",cmd=ClickAt,x=1180,y=510},
---    {screen="QuestComplete",cmd=ClickAt,x=634,y=615},
---    {screen="QuestDo",cmd=ClickAt,x=763,y=613},
---    {screen="QuestAccept",cmd=ClickAt,x=763,y=613},
---    {screen="Move",cmd=ClickAt,x=511,y=519},
---    {screen="Dead",cmd=ClickAt,x=1199,y=252},
---    {screen="PartyRequest",cmd=ClickAt,x=900,y=56},
---    {screen="HarvestExit",cmd=ClickAt,x=760,y=482},
---    {screen="QuestSelectB2",cmd=ClickAt,x=564,y=222},
---    {screen="QuestSelectB3",cmd=ClickAt,x=700,y=222},
---    {screen="QuestSelected",cmd=ClickAt,x=850,y=600},
---    {screen="QuestConfirm",cmd=ClickAt,x=760,y=500},
---    {screen="ClearDungeon",cmd=onDungeonClear,x=956,y=635},
---    {screen="DungeonEXP/NoMore",cmd=ClickAt,x=1240,y=40},   -- Exit
---    {screen="DungeonGold/CanDo",cmd=ClickAt,x=1080,y=640},   
-    
-
---    {screen="WeeklyQuest/NoQuest",cmd=ClickAt,x=1238,y=45},
---    {screen="WeeklyQuest/DoQuest",cmd=ClickAt,x=940,y=420},
---    {screen="WeeklyQuest/QuestSuccess",cmd=ClickAt,x=937,y=423},
---    {screen="WeeklyQuest/MoveNow",cmd=ClickAt,x=940,y=420},
---    {screen="WeeklyQuest/NoQuest",cmd=ClickAt,x=1242,y=40},
     
     {screen="Main/Success",cmd=ClickAt,x=260,y=330},
     {screen="Main/Harvest",cmd=ClickAt,x=689,y=262},

@@ -20,6 +20,13 @@ using Accord.Statistics.Kernels;
 using Accord.Math.Optimization.Losses;
 using LuaInterface;
 using System.Threading.Tasks;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
+using Emgu.CV.UI;
+using Emgu.CV.Features2D;
+using Emgu.CV.Util;
+using Emgu.CV.Flann;
 
 namespace MyAutoIt
 {
@@ -695,6 +702,10 @@ namespace MyAutoIt
         private void clearToolStripMenuItem_Click(object sender, EventArgs e)
         {
             lstTask.Items.Clear();
+        }
+
+        private void emguToolStripMenuItem_Click(object sender, EventArgs e)
+        {
         }
     }
 

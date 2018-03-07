@@ -60,6 +60,7 @@
             this.lstTask = new System.Windows.Forms.ListBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.emguToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -231,7 +232,8 @@
             // debugToolStripMenuItem
             // 
             this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addTaskToolStripMenuItem});
+            this.addTaskToolStripMenuItem,
+            this.emguToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(66, 24);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -239,7 +241,7 @@
             // addTaskToolStripMenuItem
             // 
             this.addTaskToolStripMenuItem.Name = "addTaskToolStripMenuItem";
-            this.addTaskToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
+            this.addTaskToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.addTaskToolStripMenuItem.Text = "AddTask";
             this.addTaskToolStripMenuItem.Click += new System.EventHandler(this.addTaskToolStripMenuItem_Click);
             // 
@@ -341,14 +343,21 @@
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.clearToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(182, 58);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(119, 30);
             // 
             // clearToolStripMenuItem
             // 
             this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
-            this.clearToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.clearToolStripMenuItem.Size = new System.Drawing.Size(118, 26);
             this.clearToolStripMenuItem.Text = "Clear";
             this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
+            // 
+            // emguToolStripMenuItem
+            // 
+            this.emguToolStripMenuItem.Name = "emguToolStripMenuItem";
+            this.emguToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.emguToolStripMenuItem.Text = "Emgu";
+            this.emguToolStripMenuItem.Click += new System.EventHandler(this.emguToolStripMenuItem_Click);
             // 
             // Linage2
             // 
@@ -417,5 +426,6 @@
         private System.Windows.Forms.ListBox lstTask;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem clearToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem emguToolStripMenuItem;
     }
 }
