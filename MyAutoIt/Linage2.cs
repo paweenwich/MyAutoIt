@@ -55,6 +55,9 @@ namespace MyAutoIt
         }
         public void Reload()
         {
+            lua = new Lua();
+
+
 
             logClear();
             logDebug("Reload");
@@ -75,9 +78,8 @@ namespace MyAutoIt
         public void LoadScript()
         {
             String lua_script_path = Application.StartupPath + @"\Script\";
-            lua = new Lua();
-            lua["script_path"] = lua_script_path;
             lua["bot"] = this;
+            lua["script_path"] = lua_script_path;
             Console.WriteLine("Loading Main.lua...");
             try
             {
@@ -657,7 +659,8 @@ namespace MyAutoIt
 
         public void log(string data)
         {
-            Console.WriteLine(data);
+            //Console.WriteLine(data);
+            txtDebug.AppendText(data + "\n");
         }
 
         private void reloadScriptToolStripMenuItem_Click(object sender, EventArgs e)
