@@ -17,6 +17,7 @@ using Emgu.CV.Flann;
 using Emgu.CV.XFeatures2D;
 using System.IO;
 using System.Xml.Serialization;
+using Newtonsoft.Json;
 
 namespace MyAutoIt
 {
@@ -208,9 +209,17 @@ namespace MyAutoIt
             SimpleFeature sf = SimpleFeature.CreateFromFolder(@"Linage2\Main\PartyAuto", "PartyAuto",24);
             foreach(SimpleFeatureData sd in sf)
             {
-                Mat result = new Mat();
-                Features2DToolbox.DrawKeypoints(sd.mat, sd.keyPoints, result, new Bgr(Color.Red));
-                lstMat.Add(result);
+                Mat result1 = new Mat();
+                Mat result2 = new Mat();
+                Mat result3 = new Mat();
+                Features2DToolbox.DrawKeypoints(sd.mat.Split()[0], sd.keyPoints, result1, new Bgr(Color.Blue));
+                lstMat.Add(result1);
+                Features2DToolbox.DrawKeypoints(sd.mat.Split()[1], sd.keyPoints, result2, new Bgr(Color.Green));
+                lstMat.Add(result2);
+                Features2DToolbox.DrawKeypoints(sd.mat.Split()[2], sd.keyPoints, result3, new Bgr(Color.Red));
+                lstMat.Add(result3);
+                log(CVUtil.ToString(sd.keyPoints));
+                log(CVUtil.ToString(sd.descriptors));
             }
             FileInfo[] files = Utils.GetFilesByExtensions(new DirectoryInfo(@"Linage2\Main\PartyAuto"), ".jpg", ".png").ToArray();
             foreach (FileInfo f in files)
@@ -220,6 +229,7 @@ namespace MyAutoIt
                 {
                     Console.WriteLine("HasFeature " + f.FullName);
                 }
+                break;
             }
             //ShowKeyPoints();
             Refresh();
@@ -269,6 +279,7 @@ namespace MyAutoIt
                 }
 
                 matcher.KnnMatch(observedDescriptors, matches, k, null);
+                Console.WriteLine(CVUtil.ToString(matches));
                 Mat uniqueMask = new Mat(matches.Size, 1, DepthType.Cv8U, 1);
                 uniqueMask.SetTo(new MCvScalar(255));
                 Features2DToolbox.VoteForUniqueness(matches, uniquenessThreshold, uniqueMask);
@@ -372,7 +383,7 @@ namespace MyAutoIt
             return mat;
         }
 
-        private static Mat ImageToMat(Image image)
+        public static Mat ImageToMat(Image image)
         {
             int stride = 0;
             Bitmap bmp = new Bitmap(image);
@@ -396,6 +407,72 @@ namespace MyAutoIt
 
             return cvImage.Mat;
         }
+        public static String ToString(MKeyPoint keyPoint, String indent = "")
+        {
+            return indent + JsonConvert.SerializeObject(keyPoint);
+        }
+        public static String ToString(MDMatch dMatch, String indent="")
+        {
+            return indent + JsonConvert.SerializeObject(dMatch);
+        }
 
+        public static String ToString(VectorOfKeyPoint vKeyPoint, String indent = "")
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(indent + "[VectorOfKeyPoint Size=" + vKeyPoint.Size);
+            for(int i = 0; i < vKeyPoint.Size; i++)
+            {
+                sb.Append("\n" + ToString(vKeyPoint[i],indent + "\t"));
+            }
+            sb.Append("\n" + indent + "]");
+            return sb.ToString();
+        }
+        public static String ToString(VectorOfDMatch vDMatch,String indent = "")
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(indent+ "[VectorOfDMatch Size=" + vDMatch.Size);
+            for (int i = 0; i < vDMatch.Size; i++)
+            {
+                sb.Append("\n" + ToString(vDMatch[i], indent + "\t"));
+            }
+            sb.Append("\n" + indent + "]");
+            return sb.ToString();
+        }
+        public static String ToString(VectorOfVectorOfDMatch vDMatch,String indent = "")
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(indent + "[VectorOfVectorOfDMatch Size=" + vDMatch.Size);
+            for (int i = 0; i < vDMatch.Size; i++)
+            {
+                sb.Append("\n" + ToString(vDMatch[i], indent + "\t"));
+            }
+            sb.Append("\n" + indent + "]");
+            return sb.ToString();
+        }
+
+        
+
+        public static String ToString(Mat mat)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("[Dims=" + mat.Dims + " " + ToString(mat.SizeOfDimemsion));
+            sb.Append("\n]");
+            return sb.ToString();
+        }
+        public static String ToString<T>(T[] d)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("[");
+            for (int i = 0; i < d.Length; i++)
+            {
+                if (i > 0)
+                {
+                    sb.Append(",");
+                }
+                sb.Append(d[i]);
+            }
+            sb.Append("]");
+            return sb.ToString();
+        }
     }
 }
