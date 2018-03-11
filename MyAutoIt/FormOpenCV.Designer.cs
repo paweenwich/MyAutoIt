@@ -31,6 +31,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.shoePointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -48,7 +49,8 @@
             // debugToolStripMenuItem
             // 
             this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.testToolStripMenuItem});
+            this.testToolStripMenuItem,
+            this.shoePointsToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(66, 24);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -60,6 +62,13 @@
             this.testToolStripMenuItem.Text = "Test";
             this.testToolStripMenuItem.Click += new System.EventHandler(this.testToolStripMenuItem_Click);
             // 
+            // shoePointsToolStripMenuItem
+            // 
+            this.shoePointsToolStripMenuItem.Name = "shoePointsToolStripMenuItem";
+            this.shoePointsToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.shoePointsToolStripMenuItem.Text = "ShowPoints";
+            this.shoePointsToolStripMenuItem.Click += new System.EventHandler(this.shoePointsToolStripMenuItem_Click);
+            // 
             // FormOpenCV
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -69,6 +78,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "FormOpenCV";
             this.Text = "FormOpenCV";
+            this.SizeChanged += new System.EventHandler(this.FormOpenCV_SizeChanged);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.FormOpenCV_Paint);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -82,5 +92,6 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem debugToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem testToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem shoePointsToolStripMenuItem;
     }
 }
