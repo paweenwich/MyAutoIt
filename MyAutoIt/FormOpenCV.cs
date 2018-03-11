@@ -33,8 +33,8 @@ namespace MyAutoIt
             Console.WriteLine(data);
         }
 
-        List<Mat> lstMat = new List<Mat>();
-        List<Mat> lstModelDescriptors = new List<Mat>();
+        public static List<Mat> lstMat = new List<Mat>();
+        public static List<Mat> lstModelDescriptors = new List<Mat>();
 
         public void ShowKeyPoints()
         {
@@ -218,18 +218,19 @@ namespace MyAutoIt
                 lstMat.Add(result2);
                 Features2DToolbox.DrawKeypoints(sd.mat.Split()[2], sd.keyPoints, result3, new Bgr(Color.Red));
                 lstMat.Add(result3);
-                log(CVUtil.ToString(sd.keyPoints));
-                log(CVUtil.ToString(sd.descriptors));
+                //log(CVUtil.ToString(sd.keyPoints));
+                //log(CVUtil.ToString(sd.descriptors));
             }
             FileInfo[] files = Utils.GetFilesByExtensions(new DirectoryInfo(@"Linage2\Main\PartyAuto"), ".jpg", ".png").ToArray();
             foreach (FileInfo f in files)
             {
                 Bitmap bmp = (Bitmap)Bitmap.FromFile(f.FullName);
+                Console.Write(f.FullName + " " );
                 if (sf.hasFeature(bmp))
                 {
-                    Console.WriteLine("HasFeature " + f.FullName);
+                    //Console.WriteLine("HasFeature " + f.FullName);
                 }
-                break;
+                //break;
             }
             //ShowKeyPoints();
             Refresh();
@@ -257,18 +258,19 @@ namespace MyAutoIt
         }
         public bool hasFeature(Bitmap bmpSrc)
         {
+            Console.WriteLine("num feature=" + this.Count());
             Bitmap bmp = Utils.cropImage(bmpSrc,cropRect);
             var featureDetector = new SIFT();
             Mat matTest = CVUtil.BitmapToMat(bmp);
             Mat observedDescriptors = new Mat();
             VectorOfKeyPoint observedKeyPoints = new VectorOfKeyPoint();
-            featureDetector.DetectAndCompute(matTest, null, observedKeyPoints, observedDescriptors, false);
+            featureDetector.DetectAndCompute(matTest, mask, observedKeyPoints, observedDescriptors, false);
             int k = 2;
             double uniquenessThreshold = 0.80;
             Mat homography = null;
             // Bruteforce, slower but more accurate
             // You can use KDTree for faster matching with slight loss in accuracy
-            using (Emgu.CV.Flann.LinearIndexParams ip = new Emgu.CV.Flann.LinearIndexParams())
+            using (Emgu.CV.Flann.KdTreeIndexParams ip = new Emgu.CV.Flann.KdTreeIndexParams())
             using (Emgu.CV.Flann.SearchParams sp = new SearchParams())
             using (DescriptorMatcher matcher = new FlannBasedMatcher(ip, sp))
             {
@@ -276,17 +278,24 @@ namespace MyAutoIt
                 foreach (SimpleFeatureData sd in this)
                 {
                     matcher.Add(sd.descriptors);
+                    //break;
                 }
 
                 matcher.KnnMatch(observedDescriptors, matches, k, null);
-                Console.WriteLine(CVUtil.ToString(matches));
+                Mat mat = new Mat();
+                Features2DToolbox.DrawKeypoints(matTest, observedKeyPoints, mat, new Bgr(Color.Blue));
+                FormOpenCV.lstMat.Add(mat);
+                //Console.WriteLine(CVUtil.ToString(observedDescriptors));
+                //Console.WriteLine(CVUtil.ToString(observedKeyPoints));
+                //Console.WriteLine(CVUtil.ToString(matches));
                 Mat uniqueMask = new Mat(matches.Size, 1, DepthType.Cv8U, 1);
                 uniqueMask.SetTo(new MCvScalar(255));
                 Features2DToolbox.VoteForUniqueness(matches, uniquenessThreshold, uniqueMask);
 
                 int nonZeroCount = CvInvoke.CountNonZero(uniqueMask);
-                //Console.WriteLine("nonZeroCount=" + nonZeroCount);
-                if(nonZeroCount < 4)
+                //Console.WriteLine(CVUtil.ToString(uniqueMask));
+                Console.WriteLine("nonZeroCount=" + nonZeroCount);
+/*                if (nonZeroCount < 4)
                 {
                     return false;
                 }
@@ -301,7 +310,7 @@ namespace MyAutoIt
                         //Console.WriteLine(ex.Message);
                     }
                 }
-
+                */
                 /*if (nonZeroCount >= 4)
                 {
                     nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(modelKeyPoints, observedKeyPoints,
@@ -454,8 +463,33 @@ namespace MyAutoIt
 
         public static String ToString(Mat mat)
         {
-            StringBuilder sb = new StringBuilder();
+            /*if (mat.NumberOfChannels == 1)
+            {
+                StringBuilder sb = new StringBuilder();
+                Image<Gray, Single> imgsave = mat.ToImage<Gray, Single>();
+
+                (new XmlSerializer(typeof(Image<Gray, Single>))).Serialize(new StringWriter(sb), imgsave);
+                return sb.ToString();
+
+            }
+            else
+            {
+                StringBuilder sb = new StringBuilder();
+                Image<Bgr, Byte> imgsave = mat.ToImage<Bgr, Byte>();
+
+                (new XmlSerializer(typeof(Image<Bgr, Byte>))).Serialize(new StringWriter(sb), imgsave);
+                return sb.ToString();
+            }*/
+
+             StringBuilder sb = new StringBuilder();
             sb.Append("[Dims=" + mat.Dims + " " + ToString(mat.SizeOfDimemsion));
+            for (int i = 0; i < mat.Height; i++) {
+                for (int j = 0; j < mat.Width; j++)
+                {
+                    //Object data = mat.Data.GetValue(i* mat.Width + j);
+                    //Console.WriteLine(JsonConvert.SerializeObject(data));
+                }
+            }
             sb.Append("\n]");
             return sb.ToString();
         }
