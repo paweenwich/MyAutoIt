@@ -203,25 +203,30 @@ namespace MyAutoIt
             }
             //Refresh();
         }
-
+        
         private void shoePointsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SimpleFeature sf = SimpleFeature.CreateFromFolder(@"Linage2\Main\PartyAuto", "PartyAuto",24);
-            foreach(SimpleFeatureData sd in sf)
+            SimpleFeature sf = new SimpleFeature();
+            sf.AddFeature(@"Linage2\Main\PartyAuto", "PartyAuto");
+            sf.AddFeature(@"Linage2\Main\PartyAutoNoSkill", "PartyAutoNoSkill");
+            foreach (SimpleFeatureData sd in sf)
             {
+                Mat result = new Mat();
                 Mat result1 = new Mat();
                 Mat result2 = new Mat();
                 Mat result3 = new Mat();
-                Features2DToolbox.DrawKeypoints(sd.mat.Split()[0], sd.keyPoints, result1, new Bgr(Color.Blue));
+                Features2DToolbox.DrawKeypoints(sd.mat, sd.keyPoints, result, new Bgr(Color.Cyan));
+                lstMat.Add(result);
+                /*Features2DToolbox.DrawKeypoints(sd.mat.Split()[0], sd.keyPoints, result1, new Bgr(Color.Blue));
                 lstMat.Add(result1);
                 Features2DToolbox.DrawKeypoints(sd.mat.Split()[1], sd.keyPoints, result2, new Bgr(Color.Green));
                 lstMat.Add(result2);
                 Features2DToolbox.DrawKeypoints(sd.mat.Split()[2], sd.keyPoints, result3, new Bgr(Color.Red));
-                lstMat.Add(result3);
+                lstMat.Add(result3);*/
                 //log(CVUtil.ToString(sd.keyPoints));
                 //log(CVUtil.ToString(sd.descriptors));
             }
-            FileInfo[] files = Utils.GetFilesByExtensions(new DirectoryInfo(@"Linage2\Main\PartyAuto"), ".jpg", ".png").ToArray();
+            FileInfo[] files = Utils.GetFilesByExtensions(new DirectoryInfo(@"Linage2\Main\PartyAutoNoSkill"), ".jpg", ".png").ToArray();
             foreach (FileInfo f in files)
             {
                 Bitmap bmp = (Bitmap)Bitmap.FromFile(f.FullName);
@@ -243,23 +248,29 @@ namespace MyAutoIt
         }
     }
 
-    public class SimpleFeature: List<SimpleFeatureData>
+    public class SimpleFeature : List<SimpleFeatureData>
     {
-        public String name;
         public Mat mask;
         public Rectangle cropRect;
-        public SimpleFeature(String name)
+        public SIFT featureDetector;
+        public DescriptorMatcher matcher;
+        public SimpleFeature(int numFeatures = 0)
         {
-            this.name = name;
             mask = new Mat(new Size(70, 70), DepthType.Cv8U, 1);
             CvInvoke.Rectangle(mask, new Rectangle(0, 0, 70, 70), new MCvScalar(255, 255, 255), -1);
             CvInvoke.Circle(mask, new Point(35, 37), 22, new MCvScalar(0, 0, 0), -1);
             cropRect = new Rectangle(842, 646, 70, 70);
+
+            featureDetector = new SIFT(numFeatures);
+            Emgu.CV.Flann.LinearIndexParams ip = new Emgu.CV.Flann.LinearIndexParams();
+            Emgu.CV.Flann.SearchParams sp = new SearchParams();
+            matcher = new FlannBasedMatcher(ip, sp);
+
         }
         public bool hasFeature(Bitmap bmpSrc)
         {
             Console.WriteLine("num feature=" + this.Count());
-            Bitmap bmp = Utils.cropImage(bmpSrc,cropRect);
+            Bitmap bmp = Utils.cropImage(bmpSrc, cropRect);
             var featureDetector = new SIFT();
             Mat matTest = CVUtil.BitmapToMat(bmp);
             Mat observedDescriptors = new Mat();
@@ -287,7 +298,7 @@ namespace MyAutoIt
                 FormOpenCV.lstMat.Add(mat);
                 //Console.WriteLine(CVUtil.ToString(observedDescriptors));
                 //Console.WriteLine(CVUtil.ToString(observedKeyPoints));
-                //Console.WriteLine(CVUtil.ToString(matches));
+                Console.WriteLine(CVUtil.ToString(matches));
                 Mat uniqueMask = new Mat(matches.Size, 1, DepthType.Cv8U, 1);
                 uniqueMask.SetTo(new MCvScalar(255));
                 Features2DToolbox.VoteForUniqueness(matches, uniquenessThreshold, uniqueMask);
@@ -295,22 +306,22 @@ namespace MyAutoIt
                 int nonZeroCount = CvInvoke.CountNonZero(uniqueMask);
                 //Console.WriteLine(CVUtil.ToString(uniqueMask));
                 Console.WriteLine("nonZeroCount=" + nonZeroCount);
-/*                if (nonZeroCount < 4)
-                {
-                    return false;
-                }
-                foreach (SimpleFeatureData sd in this)
-                {
-                    try
-                    {
-                        int nonZeroCount2 = Features2DToolbox.VoteForSizeAndOrientation(sd.keyPoints, observedKeyPoints, matches, uniqueMask, 1.5, 20);
-                        //Console.WriteLine("nonZeroCount2=" + nonZeroCount2);
-                    }catch(Exception ex)
-                    {
-                        //Console.WriteLine(ex.Message);
-                    }
-                }
-                */
+                /*                if (nonZeroCount < 4)
+                                {
+                                    return false;
+                                }
+                                foreach (SimpleFeatureData sd in this)
+                                {
+                                    try
+                                    {
+                                        int nonZeroCount2 = Features2DToolbox.VoteForSizeAndOrientation(sd.keyPoints, observedKeyPoints, matches, uniqueMask, 1.5, 20);
+                                        //Console.WriteLine("nonZeroCount2=" + nonZeroCount2);
+                                    }catch(Exception ex)
+                                    {
+                                        //Console.WriteLine(ex.Message);
+                                    }
+                                }
+                                */
                 /*if (nonZeroCount >= 4)
                 {
                     nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(modelKeyPoints, observedKeyPoints,
@@ -339,34 +350,29 @@ namespace MyAutoIt
             }
             return true;
         }
-        public static SimpleFeature CreateFromFolder(String folder, String name,int numFeatures = 0)
+
+        public void AddFeature(String folder, String label)
         {
-            SimpleFeature ret = new SimpleFeature(name);
-            var featureDetector = new SIFT(numFeatures);
-            Emgu.CV.Flann.LinearIndexParams ip = new Emgu.CV.Flann.LinearIndexParams();
-            Emgu.CV.Flann.SearchParams sp = new SearchParams();
-            DescriptorMatcher matcher = new FlannBasedMatcher(ip, sp);
-
-
             DirectoryInfo imageFolder = new DirectoryInfo(folder);
             FileInfo[] files = Utils.GetFilesByExtensions(imageFolder, ".jpg", ".png").ToArray();
             foreach (FileInfo finfo in files)
             {
-                if(finfo.Name == "mask.png")
+                if (finfo.Name == "mask.png")
                 {
                     continue;
                 }
                 SimpleFeatureData featureData = new SimpleFeatureData();
+                featureData.label = label;
                 Mat img = CvInvoke.Imread(finfo.FullName, ImreadModes.Color);
-                featureData.mat = CVUtil.crop_color_frame(img, ret.cropRect);
+                featureData.mat = CVUtil.crop_color_frame(img, cropRect);
 
                 VectorOfKeyPoint modelKeyPoints = new VectorOfKeyPoint();
                 Mat modelDescriptors = new Mat();
 
-                featureDetector.DetectAndCompute(featureData.mat, ret.mask, featureData.keyPoints, featureData.descriptors, false);
-                ret.Add(featureData);
+                featureDetector.DetectAndCompute(featureData.mat, mask, featureData.keyPoints, featureData.descriptors, false);
+                Add(featureData);
             }
-            return ret;
+
         }
     }
     public class SimpleFeatureData
@@ -374,6 +380,7 @@ namespace MyAutoIt
         public Mat mat = new Mat();
         public VectorOfKeyPoint keyPoints = new VectorOfKeyPoint();
         public Mat descriptors = new Mat();
+        public String label;
     }
 
     public class CVUtil
