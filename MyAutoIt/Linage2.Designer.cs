@@ -49,6 +49,7 @@
             this.saveAutoPointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addTaskToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.emguToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.txtDebug = new System.Windows.Forms.RichTextBox();
             this.chkAutoClick = new System.Windows.Forms.CheckBox();
             this.button3 = new System.Windows.Forms.Button();
@@ -60,7 +61,7 @@
             this.lstTask = new System.Windows.Forms.ListBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.emguToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.chkAutoCapture = new System.Windows.Forms.CheckBox();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -137,21 +138,21 @@
             this.txtScreenStatus});
             this.statusStrip1.Location = new System.Drawing.Point(0, 516);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(806, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(825, 22);
             this.statusStrip1.TabIndex = 5;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // txtScreenStatus
             // 
             this.txtScreenStatus.Name = "txtScreenStatus";
-            this.txtScreenStatus.Size = new System.Drawing.Size(791, 17);
+            this.txtScreenStatus.Size = new System.Drawing.Size(810, 17);
             this.txtScreenStatus.Spring = true;
             this.txtScreenStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // timer2
             // 
             this.timer2.Enabled = true;
-            this.timer2.Interval = 2000;
+            this.timer2.Interval = 2371;
             this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
             // 
             // menuStrip1
@@ -163,7 +164,7 @@
             this.debugToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(806, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(825, 28);
             this.menuStrip1.TabIndex = 7;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -241,9 +242,16 @@
             // addTaskToolStripMenuItem
             // 
             this.addTaskToolStripMenuItem.Name = "addTaskToolStripMenuItem";
-            this.addTaskToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.addTaskToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
             this.addTaskToolStripMenuItem.Text = "AddTask";
             this.addTaskToolStripMenuItem.Click += new System.EventHandler(this.addTaskToolStripMenuItem_Click);
+            // 
+            // emguToolStripMenuItem
+            // 
+            this.emguToolStripMenuItem.Name = "emguToolStripMenuItem";
+            this.emguToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
+            this.emguToolStripMenuItem.Text = "Emgu";
+            this.emguToolStripMenuItem.Click += new System.EventHandler(this.emguToolStripMenuItem_Click);
             // 
             // txtDebug
             // 
@@ -253,7 +261,7 @@
             this.txtDebug.Font = new System.Drawing.Font("Courier New", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtDebug.Location = new System.Drawing.Point(7, 95);
             this.txtDebug.Name = "txtDebug";
-            this.txtDebug.Size = new System.Drawing.Size(631, 418);
+            this.txtDebug.Size = new System.Drawing.Size(650, 418);
             this.txtDebug.TabIndex = 8;
             this.txtDebug.Text = "";
             // 
@@ -313,7 +321,7 @@
             this.panel1.Controls.Add(this.txtInput);
             this.panel1.Controls.Add(this.lstTask);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel1.Location = new System.Drawing.Point(644, 28);
+            this.panel1.Location = new System.Drawing.Point(663, 28);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(162, 488);
             this.panel1.TabIndex = 14;
@@ -352,18 +360,23 @@
             this.clearToolStripMenuItem.Text = "Clear";
             this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
             // 
-            // emguToolStripMenuItem
+            // chkAutoCapture
             // 
-            this.emguToolStripMenuItem.Name = "emguToolStripMenuItem";
-            this.emguToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.emguToolStripMenuItem.Text = "Emgu";
-            this.emguToolStripMenuItem.Click += new System.EventHandler(this.emguToolStripMenuItem_Click);
+            this.chkAutoCapture.AutoSize = true;
+            this.chkAutoCapture.Location = new System.Drawing.Point(550, 37);
+            this.chkAutoCapture.Name = "chkAutoCapture";
+            this.chkAutoCapture.Size = new System.Drawing.Size(109, 21);
+            this.chkAutoCapture.TabIndex = 15;
+            this.chkAutoCapture.Text = "AutoCapture";
+            this.chkAutoCapture.UseVisualStyleBackColor = true;
+            this.chkAutoCapture.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // Linage2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(806, 538);
+            this.ClientSize = new System.Drawing.Size(825, 538);
+            this.Controls.Add(this.chkAutoCapture);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.cmbADBDevice);
             this.Controls.Add(this.button5);
@@ -427,5 +440,6 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem clearToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem emguToolStripMenuItem;
+        private System.Windows.Forms.CheckBox chkAutoCapture;
     }
 }

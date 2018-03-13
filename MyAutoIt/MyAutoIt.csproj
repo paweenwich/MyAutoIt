@@ -171,6 +171,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="CENet.cs" />
+    <Compile Include="CVUtil.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

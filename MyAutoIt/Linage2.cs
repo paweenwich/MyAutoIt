@@ -358,6 +358,10 @@ namespace MyAutoIt
 
         private void timer2_Tick(object sender, EventArgs e)
         {
+            if (chkAutoCapture.Checked)
+            {
+                btnCaptureToFile_Click(sender, e);
+            }
             ExecScript("if ProcessTask ~= nil then ProcessTask() end");
             if (CorrectScreenSize())
             {
@@ -706,6 +710,11 @@ namespace MyAutoIt
 
         private void emguToolStripMenuItem_Click(object sender, EventArgs e)
         {
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
     }
 

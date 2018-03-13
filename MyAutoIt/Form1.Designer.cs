@@ -48,7 +48,7 @@
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(207, 7);
-            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(100, 28);
             this.button1.TabIndex = 0;
@@ -60,7 +60,7 @@
             // 
             this.txtDebug.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txtDebug.Location = new System.Drawing.Point(0, 178);
-            this.txtDebug.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtDebug.Margin = new System.Windows.Forms.Padding(4);
             this.txtDebug.Name = "txtDebug";
             this.txtDebug.Size = new System.Drawing.Size(483, 0);
             this.txtDebug.TabIndex = 1;
@@ -69,7 +69,7 @@
             // button2
             // 
             this.button2.Location = new System.Drawing.Point(207, 85);
-            this.button2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button2.Margin = new System.Windows.Forms.Padding(4);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(100, 28);
             this.button2.TabIndex = 2;
@@ -90,7 +90,7 @@
             this.panel1.Controls.Add(this.button1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panel1.Margin = new System.Windows.Forms.Padding(4);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(483, 178);
             this.panel1.TabIndex = 3;
@@ -99,7 +99,7 @@
             // 
             this.chkSmart.AutoSize = true;
             this.chkSmart.Location = new System.Drawing.Point(208, 153);
-            this.chkSmart.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.chkSmart.Margin = new System.Windows.Forms.Padding(4);
             this.chkSmart.Name = "chkSmart";
             this.chkSmart.Size = new System.Drawing.Size(67, 21);
             this.chkSmart.TabIndex = 9;
@@ -129,7 +129,7 @@
             // trackBar1
             // 
             this.trackBar1.Location = new System.Drawing.Point(328, 7);
-            this.trackBar1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.trackBar1.Margin = new System.Windows.Forms.Padding(4);
             this.trackBar1.Maximum = 1500;
             this.trackBar1.Minimum = 1;
             this.trackBar1.Name = "trackBar1";
@@ -144,7 +144,7 @@
             // button3
             // 
             this.button3.Location = new System.Drawing.Point(207, 121);
-            this.button3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button3.Margin = new System.Windows.Forms.Padding(4);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(100, 28);
             this.button3.TabIndex = 5;
@@ -158,7 +158,7 @@
             this.chkStart.Appearance = System.Windows.Forms.Appearance.Button;
             this.chkStart.Enabled = false;
             this.chkStart.Location = new System.Drawing.Point(207, 43);
-            this.chkStart.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.chkStart.Margin = new System.Windows.Forms.Padding(4);
             this.chkStart.Name = "chkStart";
             this.chkStart.Size = new System.Drawing.Size(100, 28);
             this.chkStart.TabIndex = 4;
@@ -171,7 +171,7 @@
             // 
             this.imgDebug.BackColor = System.Drawing.SystemColors.HighlightText;
             this.imgDebug.Location = new System.Drawing.Point(4, 7);
-            this.imgDebug.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.imgDebug.Margin = new System.Windows.Forms.Padding(4);
             this.imgDebug.Name = "imgDebug";
             this.imgDebug.Size = new System.Drawing.Size(195, 167);
             this.imgDebug.TabIndex = 3;
@@ -188,7 +188,7 @@
             this.ClientSize = new System.Drawing.Size(483, 176);
             this.Controls.Add(this.txtDebug);
             this.Controls.Add(this.panel1);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Dimond Dash Util 1.0";

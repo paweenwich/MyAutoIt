@@ -206,17 +206,33 @@ namespace MyAutoIt
         
         private void shoePointsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SimpleFeature sf = new SimpleFeature();
-            sf.AddFeature(@"Linage2\Main\PartyAuto", "PartyAuto");
-            sf.AddFeature(@"Linage2\Main\PartyAutoNoSkill", "PartyAutoNoSkill");
+            Size size = new Size(70, 70);
+            Rectangle rect = new Rectangle(new Point(0, 0), size);
+            Mat mask = new Mat(size, DepthType.Cv8U, 1);
+            CvInvoke.Rectangle(mask, rect, new MCvScalar(255, 255, 255), -1);
+            CvInvoke.Circle(mask, new Point(35, 37), 23, new MCvScalar(0, 0, 0), -1);
+
+            //Set color filter
+            Mat lower = new Mat(size, DepthType.Cv8U, 3);
+            CvInvoke.Rectangle(lower, rect, new MCvScalar(200, 150, 0), -1);
+            //FormOpenCV.lstMat.Add(lower);
+            Mat upper = new Mat(size, DepthType.Cv8U, 3);
+            CvInvoke.Rectangle(upper, rect, new MCvScalar(255, 250, 200), -1);
+            //FormOpenCV.lstMat.Add(upper);
+
+            SimpleFeature sf = new SimpleFeature(new Point(842, 646), size, mask, lower, upper);
+            
+            sf.AddFeature(@"Linage2\SIFT\AutoNoSkill", "AutoNoSkill", true);
+            sf.AddFeature(@"Linage2\SIFT\AutoSkill", "AutoSkill", true);
+            //sf.AddFeature(@"Linage2\SIFT\NoAuto", "NoAuto",0, true);
             foreach (SimpleFeatureData sd in sf)
             {
-                Mat result = new Mat();
-                Mat result1 = new Mat();
-                Mat result2 = new Mat();
-                Mat result3 = new Mat();
-                Features2DToolbox.DrawKeypoints(sd.mat, sd.keyPoints, result, new Bgr(Color.Cyan));
-                lstMat.Add(result);
+                //Mat result = new Mat();
+                //Mat result1 = new Mat();
+                //Mat result2 = new Mat();
+                //Mat result3 = new Mat();
+                //Features2DToolbox.DrawKeypoints(sd.mat, sd.keyPoints, result, new Bgr(Color.Cyan));
+                //lstMat.Add(result);
                 /*Features2DToolbox.DrawKeypoints(sd.mat.Split()[0], sd.keyPoints, result1, new Bgr(Color.Blue));
                 lstMat.Add(result1);
                 Features2DToolbox.DrawKeypoints(sd.mat.Split()[1], sd.keyPoints, result2, new Bgr(Color.Green));
@@ -225,19 +241,21 @@ namespace MyAutoIt
                 lstMat.Add(result3);*/
                 //log(CVUtil.ToString(sd.keyPoints));
                 //log(CVUtil.ToString(sd.descriptors));
+                //Refresh();
             }
-            FileInfo[] files = Utils.GetFilesByExtensions(new DirectoryInfo(@"Linage2\Main\PartyAutoNoSkill"), ".jpg", ".png").ToArray();
+            foreach (SimpleFeatureTestData sd in sf.testData)
+            {
+                Bitmap bmp = (Bitmap)Bitmap.FromFile(sd.filePath);
+                Console.WriteLine(sd.filePath +  " " + sf.GetFeature(bmp));
+            }
+                
+            FileInfo[] files = Utils.GetFilesByExtensions(new DirectoryInfo(@"Linage2\SIFT\NoAuto"), ".jpg", ".png").ToArray();
             foreach (FileInfo f in files)
             {
                 Bitmap bmp = (Bitmap)Bitmap.FromFile(f.FullName);
-                Console.Write(f.FullName + " " );
-                if (sf.hasFeature(bmp))
-                {
-                    //Console.WriteLine("HasFeature " + f.FullName);
-                }
-                //break;
+                Console.WriteLine(f.FullName + " " + sf.GetFeature(bmp));
             }
-            //ShowKeyPoints();
+                //ShowKeyPoints();
             Refresh();
         }
 
@@ -251,34 +269,102 @@ namespace MyAutoIt
     public class SimpleFeature : List<SimpleFeatureData>
     {
         public Mat mask;
+        public Mat lower;
+        public Mat upper;
+        public int colorIndex;
         public Rectangle cropRect;
         public SIFT featureDetector;
         public DescriptorMatcher matcher;
-        public SimpleFeature(int numFeatures = 0)
+        public List<SimpleFeatureTestData> testData = new List<SimpleFeatureTestData>();
+        public Size size;
+        public SimpleFeature(Point cropPoint,Size size,Mat mask,Mat lower,Mat upper)
         {
-            mask = new Mat(new Size(70, 70), DepthType.Cv8U, 1);
-            CvInvoke.Rectangle(mask, new Rectangle(0, 0, 70, 70), new MCvScalar(255, 255, 255), -1);
-            CvInvoke.Circle(mask, new Point(35, 37), 22, new MCvScalar(0, 0, 0), -1);
-            cropRect = new Rectangle(842, 646, 70, 70);
+            this.size = size;
+            this.mask = mask;
+            this.lower = lower;
+            this.upper = upper;
+            colorIndex = -1;
+            
+            cropRect = new Rectangle(cropPoint, size);
 
-            featureDetector = new SIFT(numFeatures);
+            //featureDetector = new SIFT(0,2,0.02,20,0.4);
+            featureDetector = new SIFT(0,3,0.04,10,0.8);
             Emgu.CV.Flann.LinearIndexParams ip = new Emgu.CV.Flann.LinearIndexParams();
             Emgu.CV.Flann.SearchParams sp = new SearchParams();
             matcher = new FlannBasedMatcher(ip, sp);
 
+            //Set color filter
+            //lower = new Mat(new Size(70, 70), DepthType.Cv8U, 3);
+            //CvInvoke.Rectangle(lower, new Rectangle(0, 0, 70, 70), new MCvScalar(200, 150, 0), -1);
+            //FormOpenCV.lstMat.Add(lower);
+            //upper = new Mat(new Size(70, 70), DepthType.Cv8U, 3);
+            //CvInvoke.Rectangle(upper, new Rectangle(0, 0, 70, 70), new MCvScalar(255, 250, 200), -1);
+            //FormOpenCV.lstMat.Add(upper);
+
+            //CvInvoke.InRange(img, lowerLimit, upperLimit, imgOut);
+
         }
-        public bool hasFeature(Bitmap bmpSrc)
+        public String GetLabel(int index)
         {
-            Console.WriteLine("num feature=" + this.Count());
-            Bitmap bmp = Utils.cropImage(bmpSrc, cropRect);
-            var featureDetector = new SIFT();
+            return this[index].label;
+        }
+        public String GetLabelFromMatches(VectorOfVectorOfDMatch vDMatch)
+        {
+            Dictionary<String, int> labelCount = new Dictionary<string, int>();
+            for (int i = 0; i < vDMatch.Size; i++)
+            {
+                VectorOfDMatch vMatch = vDMatch[i];
+                for (int j = 0; j < vMatch.Size; j++)
+                {
+                    MDMatch dmatch = vMatch[j];
+                    //sb.Append("\n\t" + JsonConvert.SerializeObject(dmatch) + " " + );
+                    String label = GetLabel(dmatch.ImgIdx);
+                    if (labelCount.ContainsKey(label))
+                    {
+                        labelCount[label] += 1;
+                    }else
+                    {
+                        labelCount[label] = 1;
+                    }
+                }
+            }
+            String ret = labelCount.Keys.Aggregate((i, j) => labelCount[i] >= labelCount[j] ? i : j);
+            return ret;
+
+        }
+        public String MatchesToString(VectorOfVectorOfDMatch vDMatch, String indent="")
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(indent + "[VectorOfVectorOfDMatch Size=" + vDMatch.Size);
+            for (int i = 0; i < vDMatch.Size; i++)
+            {
+                VectorOfDMatch vMatch = vDMatch[i];
+                for (int j = 0; j < vMatch.Size; j++)
+                {
+                    MDMatch dmatch = vMatch[j];
+                    sb.Append("\n\t" + JsonConvert.SerializeObject(dmatch) + " " + GetLabel(dmatch.ImgIdx) );
+                }
+                //sb.Append("\n" + ToString(vDMatch[i], indent + "\t"));
+            }
+            sb.Append("\n" + indent + "]");
+            return sb.ToString();
+        }
+        public String GetFeature(Bitmap bmpSrc)
+        {
+            Mat matTest = CVUtil.BitmapToMat(bmpSrc);
+            matTest = ProcessImage(matTest);
+            /*Bitmap bmp = Utils.cropImage(bmpSrc, cropRect);
             Mat matTest = CVUtil.BitmapToMat(bmp);
+            if (colorIndex != -1)
+            {
+                matTest = matTest.Split()[colorIndex];
+            }*/
             Mat observedDescriptors = new Mat();
             VectorOfKeyPoint observedKeyPoints = new VectorOfKeyPoint();
             featureDetector.DetectAndCompute(matTest, mask, observedKeyPoints, observedDescriptors, false);
             int k = 2;
             double uniquenessThreshold = 0.80;
-            Mat homography = null;
+            //Mat homography = null;
             // Bruteforce, slower but more accurate
             // You can use KDTree for faster matching with slight loss in accuracy
             using (Emgu.CV.Flann.KdTreeIndexParams ip = new Emgu.CV.Flann.KdTreeIndexParams())
@@ -298,14 +384,23 @@ namespace MyAutoIt
                 FormOpenCV.lstMat.Add(mat);
                 //Console.WriteLine(CVUtil.ToString(observedDescriptors));
                 //Console.WriteLine(CVUtil.ToString(observedKeyPoints));
-                Console.WriteLine(CVUtil.ToString(matches));
+                //Console.WriteLine(CVUtil.ToString(matches));
+                //Console.WriteLine(MatchesToString(matches));
                 Mat uniqueMask = new Mat(matches.Size, 1, DepthType.Cv8U, 1);
                 uniqueMask.SetTo(new MCvScalar(255));
                 Features2DToolbox.VoteForUniqueness(matches, uniquenessThreshold, uniqueMask);
 
                 int nonZeroCount = CvInvoke.CountNonZero(uniqueMask);
+                if (nonZeroCount > 4)
+                {
+                    return GetLabelFromMatches(matches);
+                }
+                else
+                {
+                    return "";
+                }
                 //Console.WriteLine(CVUtil.ToString(uniqueMask));
-                Console.WriteLine("nonZeroCount=" + nonZeroCount);
+                //Console.WriteLine("nonZeroCount=" + nonZeroCount);
                 /*                if (nonZeroCount < 4)
                                 {
                                     return false;
@@ -348,29 +443,82 @@ namespace MyAutoIt
                     }
                 }*/
             }
-            return true;
         }
 
-        public void AddFeature(String folder, String label)
+        public Mat ProcessImage(Mat img)
+        {
+            if (colorIndex != -1)
+            {
+                img = img.Split()[colorIndex];
+            }
+
+            //CvInvoke.InRange(img, lowerLimit, upperLimit, imgOut);
+            img = CVUtil.crop_color_frame(img, cropRect);
+            Mat ret = new Mat();
+            if (lower != null)
+            {
+                CvInvoke.InRange(img, lower, upper, ret);
+            }else
+            {
+                ret = img;
+            }
+            return ret;
+        }
+
+        public void AddFeature(String folder, String label, bool flgTrain = false)
         {
             DirectoryInfo imageFolder = new DirectoryInfo(folder);
             FileInfo[] files = Utils.GetFilesByExtensions(imageFolder, ".jpg", ".png").ToArray();
+            int numFeature = files.Length;
+            if (flgTrain)
+            {
+                numFeature = (int)(0.7 * numFeature);
+            }
+            int index = 0;
             foreach (FileInfo finfo in files)
             {
                 if (finfo.Name == "mask.png")
                 {
                     continue;
                 }
-                SimpleFeatureData featureData = new SimpleFeatureData();
-                featureData.label = label;
-                Mat img = CvInvoke.Imread(finfo.FullName, ImreadModes.Color);
-                featureData.mat = CVUtil.crop_color_frame(img, cropRect);
+                if (index <= numFeature)
+                {
+                    SimpleFeatureData featureData = new SimpleFeatureData();
+                    featureData.label = label;
+                    Mat img = CvInvoke.Imread(finfo.FullName, ImreadModes.Color);
+                    img = ProcessImage(img);
+                    /*
+                        if (colorIndex != -1)
+                        {
+                            img = img.Split()[colorIndex];
+                        }
 
-                VectorOfKeyPoint modelKeyPoints = new VectorOfKeyPoint();
-                Mat modelDescriptors = new Mat();
+                        //CvInvoke.InRange(img, lowerLimit, upperLimit, imgOut);
+                        featureData.mat = CVUtil.crop_color_frame(img, cropRect);
+                        Mat imgOut = new Mat();
+                        CvInvoke.InRange(featureData.mat, lower, upper, imgOut);
+                        //FormOpenCV.lstMat.Add(imgOut);
+                        featureData.mat = imgOut;
+                    */
+                    featureData.mat = img;
+                    //FormOpenCV.lstMat.Add(img);
 
-                featureDetector.DetectAndCompute(featureData.mat, mask, featureData.keyPoints, featureData.descriptors, false);
-                Add(featureData);
+                    VectorOfKeyPoint modelKeyPoints = new VectorOfKeyPoint();
+                    Mat modelDescriptors = new Mat();
+
+                    featureDetector.DetectAndCompute(featureData.mat, mask, featureData.keyPoints, featureData.descriptors, false);
+
+                    Mat result = new Mat();
+                    Features2DToolbox.DrawKeypoints(featureData.mat, featureData.keyPoints, result, new Bgr(Color.Cyan));
+                    FormOpenCV.lstMat.Add(result);
+
+                    Add(featureData);
+                }
+                else
+                {
+                    testData.Add(new SimpleFeatureTestData(finfo.FullName, label));
+                }
+                index++;
             }
 
         }
@@ -382,138 +530,15 @@ namespace MyAutoIt
         public Mat descriptors = new Mat();
         public String label;
     }
-
-    public class CVUtil
+    public class SimpleFeatureTestData
     {
-        public static Mat crop_color_frame(Mat input, Rectangle crop_region)
+        public String filePath;
+        public String label;
+        public SimpleFeatureTestData(String filePath, String label)
         {
-            Image<Bgr, Byte> buffer_im = input.ToImage<Bgr, Byte>();
-            buffer_im.ROI = crop_region;
-            Image<Bgr, Byte> cropped_im = buffer_im.Copy();
-            return cropped_im.Mat;
-        }
-        public static Mat BitmapToMat(Bitmap bitmap)
-        {
-            Image<Bgr, Byte> imageCV = new Image<Bgr, byte>(bitmap); //Image Class from Emgu.CV
-            Mat mat = imageCV.Mat; //This is your Image converted to Mat
-            return mat;
-        }
-
-        public static Mat ImageToMat(Image image)
-        {
-            int stride = 0;
-            Bitmap bmp = new Bitmap(image);
-
-            System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height);
-            System.Drawing.Imaging.BitmapData bmpData = bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, bmp.PixelFormat);
-
-            System.Drawing.Imaging.PixelFormat pf = bmp.PixelFormat;
-            if (pf == System.Drawing.Imaging.PixelFormat.Format32bppArgb)
-            {
-                stride = bmp.Width * 4;
-            }
-            else
-            {
-                stride = bmp.Width * 3;
-            }
-
-            Image<Bgra, byte> cvImage = new Image<Bgra, byte>(bmp.Width, bmp.Height, stride, (IntPtr)bmpData.Scan0);
-
-            bmp.UnlockBits(bmpData);
-
-            return cvImage.Mat;
-        }
-        public static String ToString(MKeyPoint keyPoint, String indent = "")
-        {
-            return indent + JsonConvert.SerializeObject(keyPoint);
-        }
-        public static String ToString(MDMatch dMatch, String indent="")
-        {
-            return indent + JsonConvert.SerializeObject(dMatch);
-        }
-
-        public static String ToString(VectorOfKeyPoint vKeyPoint, String indent = "")
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(indent + "[VectorOfKeyPoint Size=" + vKeyPoint.Size);
-            for(int i = 0; i < vKeyPoint.Size; i++)
-            {
-                sb.Append("\n" + ToString(vKeyPoint[i],indent + "\t"));
-            }
-            sb.Append("\n" + indent + "]");
-            return sb.ToString();
-        }
-        public static String ToString(VectorOfDMatch vDMatch,String indent = "")
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(indent+ "[VectorOfDMatch Size=" + vDMatch.Size);
-            for (int i = 0; i < vDMatch.Size; i++)
-            {
-                sb.Append("\n" + ToString(vDMatch[i], indent + "\t"));
-            }
-            sb.Append("\n" + indent + "]");
-            return sb.ToString();
-        }
-        public static String ToString(VectorOfVectorOfDMatch vDMatch,String indent = "")
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(indent + "[VectorOfVectorOfDMatch Size=" + vDMatch.Size);
-            for (int i = 0; i < vDMatch.Size; i++)
-            {
-                sb.Append("\n" + ToString(vDMatch[i], indent + "\t"));
-            }
-            sb.Append("\n" + indent + "]");
-            return sb.ToString();
-        }
-
-        
-
-        public static String ToString(Mat mat)
-        {
-            /*if (mat.NumberOfChannels == 1)
-            {
-                StringBuilder sb = new StringBuilder();
-                Image<Gray, Single> imgsave = mat.ToImage<Gray, Single>();
-
-                (new XmlSerializer(typeof(Image<Gray, Single>))).Serialize(new StringWriter(sb), imgsave);
-                return sb.ToString();
-
-            }
-            else
-            {
-                StringBuilder sb = new StringBuilder();
-                Image<Bgr, Byte> imgsave = mat.ToImage<Bgr, Byte>();
-
-                (new XmlSerializer(typeof(Image<Bgr, Byte>))).Serialize(new StringWriter(sb), imgsave);
-                return sb.ToString();
-            }*/
-
-             StringBuilder sb = new StringBuilder();
-            sb.Append("[Dims=" + mat.Dims + " " + ToString(mat.SizeOfDimemsion));
-            for (int i = 0; i < mat.Height; i++) {
-                for (int j = 0; j < mat.Width; j++)
-                {
-                    //Object data = mat.Data.GetValue(i* mat.Width + j);
-                    //Console.WriteLine(JsonConvert.SerializeObject(data));
-                }
-            }
-            sb.Append("\n]");
-            return sb.ToString();
-        }
-        public static String ToString<T>(T[] d)
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("[");
-            for (int i = 0; i < d.Length; i++)
-            {
-                if (i > 0)
-                {
-                    sb.Append(",");
-                }
-                sb.Append(d[i]);
-            }
-            sb.Append("]");
-            return sb.ToString();
+            this.filePath = filePath;
+            this.label = label;
         }
     }
+
 }
