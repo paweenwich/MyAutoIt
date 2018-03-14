@@ -7,6 +7,14 @@ function string.ends(String,End)
    return End=='' or string.sub(String,-string.len(End))==End
 end
 
+function ArrayToString(arr)
+    local ret = "";
+    for i=0,arr.Length -1 do
+        ret = ret .. " " .. arr[i];
+    end;
+    return ret;
+end;
+
 function ClickAt(tab)
     if tab.clickPoint ~= nil then
         Click(tab.clickPoint);
@@ -52,8 +60,9 @@ function Auto()
                 screenName = screenName .. "/" .. subResult.label;
             end;
         end;
+        local features = bot:GetFeatures(currentBitMap);
         bot:log("[" .. currentState .. '] ' .. screenName);
-        bot.txtScreenStatus.Text = "[" .. currentState .. '] ' .. screenName;
+        bot.txtScreenStatus.Text = "[" .. currentState .. '] ' .. screenName .. ' ' .. ArrayToString(features);
         local screen = GetStateTable(currentState,screenName);
         if screen ~= nil then
             screen:cmd();
@@ -145,12 +154,13 @@ stateTable["Auto"] = {
         end,
     x=1242,y=40},
     
-    {screen="Main/Success",cmd=ClickAt,x=260,y=330},
+    --{screen="Main/Success",cmd=ClickAt,x=260,y=330},
+    {screen="Main/Success",cmd=ClickAt,x=260,y=407},
     {screen="Main/Harvest",cmd=ClickAt,x=689,y=262},
     {screen="Main/HarvestDone",cmd=ClickAt,x=863,y=84},
 --    {screen="Main/PartyAutoNoSkill",cmd=ClickAt,x=874,y=683},
-    {screen="Main/Quest2",cmd=ClickAt,x=52,y=312},
-    
+--    {screen="Main/Quest2",cmd=ClickAt,x=52,y=312},
+    {screen="Main/Quest2",cmd=ClickAt,x=91,y=400},
     {screen="Login",cmd=ClickAt,x=625,y=610},
     {screen="Ads",cmd=ClickAt,x=1257,y=21},
     {screen="CharSelect",cmd=ClickAt,x=1079,y=647},

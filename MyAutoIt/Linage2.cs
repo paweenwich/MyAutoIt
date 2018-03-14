@@ -53,6 +53,7 @@ namespace MyAutoIt
         public Lua lua;
         // ScriptTask
         public List<ScriptTaskItem> scriptTasks = new List<ScriptTaskItem>();
+        public List<SimpleFeature> features = new List<SimpleFeature>();
         public Linage2()
         {
             InitializeComponent();
@@ -81,6 +82,10 @@ namespace MyAutoIt
                 cmbADBDevice.Items.Add(new ComboDeviceItem(s, ret[s]));
                 Console.WriteLine("Add ADB Device " + ret[s]);
             }
+            features.Clear();
+            SimpleFeature sf = SimpleFeature.CreateFromFile(@"Linage2\SIFT\AutoSkill.json");
+            sf.Load(true);
+            features.Add(sf);
         }
         public void LoadScript()
         {
@@ -179,7 +184,19 @@ namespace MyAutoIt
             File.WriteAllText(dataPath + autoClickPointsFileName, JsonConvert.SerializeObject(autoClickPoints));
         }
 
-
+        public String[] GetFeatures(Bitmap bmp)
+        {
+            List<String> ret = new List<string>();
+            foreach(SimpleFeature sf in features)
+            {
+                String label = sf.GetFeature(bmp);
+                if (label != "")
+                {
+                    ret.Add(label);
+                }
+            }
+            return ret.ToArray();
+        }
         public void ActiveBlueStackWindow()
         {
             IntPtr hwnd = Utils.GetWindowHandleByProcessName(windowName);
