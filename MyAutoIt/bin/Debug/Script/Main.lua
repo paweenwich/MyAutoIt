@@ -49,26 +49,28 @@ function ProcessTask()
 end;
 
 function Auto()
-    if bot.chkAutoClick.Checked == true then
-        -- bot:log(classifyResult:ToString());
-        screenName = classifyResult.label;
-        local screens = stateTable[currentState];
-        if bot.screenClassifiers:ContainsKey(screenName) == true then
-            local subScreenClassifier = bot.screenClassifiers[screenName];
-            local subResult = subScreenClassifier:Classify(currentBitMap, 0.9);
-            if subResult ~= nil then
-                screenName = screenName .. "/" .. subResult.label;
-            end;
-        end;
-        local features = bot:GetFeatures(currentBitMap);
-        bot:log("[" .. currentState .. '] ' .. screenName);
-        bot.txtScreenStatus.Text = "[" .. currentState .. '] ' .. screenName .. ' ' .. ArrayToString(features);
-        local screen = GetStateTable(currentState,screenName);
-        if screen ~= nil then
-            screen:cmd();
-        end;
-    end;
-    bot.txtDebug:ScrollToCaret();
+
+	-- bot:log(classifyResult:ToString());
+	screenName = classifyResult.label;
+	local screens = stateTable[currentState];
+	if bot.screenClassifiers:ContainsKey(screenName) == true then
+		local subScreenClassifier = bot.screenClassifiers[screenName];
+		local subResult = subScreenClassifier:Classify(currentBitMap, 0.9);
+		if subResult ~= nil then
+			screenName = screenName .. "/" .. subResult.label;
+		end;
+	end;
+	local features = bot:GetFeatures(currentBitMap);
+	bot:log("[" .. currentState .. '] ' .. screenName);
+	bot.txtScreenStatus.Text = "[" .. currentState .. '] ' .. screenName .. ' ' .. ArrayToString(features);
+	bot.txtDebug:ScrollToCaret();
+	if bot.chkAutoClick.Checked == true then
+		local screen = GetStateTable(currentState,screenName);
+		if screen ~= nil then
+			screen:cmd();
+		end;
+	end;
+    
 end;
 
 function GetStateTable(state,screen)
@@ -135,6 +137,7 @@ stateTable["Auto"] = {
     {screen="HarvestExit",cmd=ClickAt,x=760,y=482},
     {screen="QuestSelectB2",cmd=ClickAt,x=705,y=385},
 --    {screen="QuestSelectB3",cmd=ClickAt,x=700,y=222},
+--    {screen="QuestSelectB3",cmd=ClickAt,x=850,y=222},
     {screen="QuestSelected",cmd=ClickAt,x=850,y=600},
     {screen="QuestConfirm",cmd=ClickAt,x=760,y=500},
     {screen="ClearDungeon",cmd=onDungeonClear,x=956,y=635},
