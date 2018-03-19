@@ -262,8 +262,9 @@ namespace MyAutoIt
                 Console.WriteLine(sd.filePath +  " " + sf.GetFeature(bmp));
                 //Mat mat = new Mat();
                 //Features2DToolbox.DrawKeypoints(sf.lastObserved, sf.lastObservedKeyPoint, mat, new Bgr(Color.Blue));
+                Console.WriteLine(sf.MatchesToString(sf.lastMatches));
                 lstMat.Add(sf.lastObserved);
-
+                break;
             }
             String[] testPath = { @"Linage2\SIFT\NoAuto", @"Linage2\SIFT\AutoNoSkill" };
             foreach(String path in testPath)
@@ -282,6 +283,7 @@ namespace MyAutoIt
                     {
                         mat = sf.lastObserved.Clone();
                         CvInvoke.PutText(mat, label, new Point(0, 20), FontFace.HersheyPlain, 1, new MCvScalar(255, 255, 255));
+                        Console.WriteLine(sf.MatchesToString(sf.lastMatches));
                     }
                     lstMat.Add(mat);
                 }

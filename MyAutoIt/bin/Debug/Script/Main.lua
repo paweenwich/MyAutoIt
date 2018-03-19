@@ -49,26 +49,28 @@ function ProcessTask()
 end;
 
 function Auto()
-    if bot.chkAutoClick.Checked == true then
-        -- bot:log(classifyResult:ToString());
-        screenName = classifyResult.label;
-        local screens = stateTable[currentState];
-        if bot.screenClassifiers:ContainsKey(screenName) == true then
-            local subScreenClassifier = bot.screenClassifiers[screenName];
-            local subResult = subScreenClassifier:Classify(currentBitMap, 0.9);
-            if subResult ~= nil then
-                screenName = screenName .. "/" .. subResult.label;
-            end;
-        end;
-        local features = bot:GetFeatures(currentBitMap);
-        bot:log("[" .. currentState .. '] ' .. screenName);
-        bot.txtScreenStatus.Text = "[" .. currentState .. '] ' .. screenName .. ' ' .. ArrayToString(features);
-        local screen = GetStateTable(currentState,screenName);
-        if screen ~= nil then
-            screen:cmd();
-        end;
-    end;
-    bot.txtDebug:ScrollToCaret();
+
+	-- bot:log(classifyResult:ToString());
+	screenName = classifyResult.label;
+	local screens = stateTable[currentState];
+	if bot.screenClassifiers:ContainsKey(screenName) == true then
+		local subScreenClassifier = bot.screenClassifiers[screenName];
+		local subResult = subScreenClassifier:Classify(currentBitMap, 0.9);
+		if subResult ~= nil then
+			screenName = screenName .. "/" .. subResult.label;
+		end;
+	end;
+	local features = bot:GetFeatures(currentBitMap);
+	bot:log("[" .. currentState .. '] ' .. screenName);
+	bot.txtScreenStatus.Text = "[" .. currentState .. '] ' .. screenName .. ' ' .. ArrayToString(features);
+	bot.txtDebug:ScrollToCaret();
+	if bot.chkAutoClick.Checked == true then
+		local screen = GetStateTable(currentState,screenName);
+		if screen ~= nil then
+			screen:cmd();
+		end;
+	end;
+    
 end;
 
 function GetStateTable(state,screen)
@@ -133,8 +135,8 @@ stateTable["Auto"] = {
     {screen="Dead",cmd=ClickAt,x=1199,y=252},
     {screen="PartyRequest",cmd=ClickAt,x=900,y=56},
     {screen="HarvestExit",cmd=ClickAt,x=760,y=482},
-    {screen="QuestSelectB2",cmd=ClickAt,x=564,y=222},
-    {screen="QuestSelectB3",cmd=ClickAt,x=700,y=222},
+    {screen="QuestSelectB2",cmd=ClickAt,x=705,y=385},
+    {screen="QuestSelectB3",cmd=ClickAt,x=850,y=222},
     {screen="QuestSelected",cmd=ClickAt,x=850,y=600},
     {screen="QuestConfirm",cmd=ClickAt,x=760,y=500},
     {screen="ClearDungeon",cmd=onDungeonClear,x=956,y=635},
@@ -157,7 +159,7 @@ stateTable["Auto"] = {
     --{screen="Main/Success",cmd=ClickAt,x=260,y=330},
     {screen="Main/Success",cmd=ClickAt,x=260,y=407},
     {screen="Main/Harvest",cmd=ClickAt,x=689,y=262},
-    {screen="Main/HarvestDone",cmd=ClickAt,x=863,y=84},
+    {screen="Main/HarvestDone",cmd=ClickAt,x=800,y=84},
 --    {screen="Main/PartyAutoNoSkill",cmd=ClickAt,x=874,y=683},
 --    {screen="Main/Quest2",cmd=ClickAt,x=52,y=312},
     {screen="Main/Quest2",cmd=ClickAt,x=91,y=400},

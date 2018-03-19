@@ -197,6 +197,7 @@ namespace MyAutoIt
         public List<SimpleFeatureInfo> features = new List<SimpleFeatureInfo>();
         public Mat lastObserved;
         public VectorOfKeyPoint lastObservedKeyPoint;
+        public VectorOfVectorOfDMatch lastMatches;
         public static SimpleFeature CreateFromFile(String fileName)
         {
             String data = File.ReadAllText(fileName);
@@ -321,6 +322,7 @@ namespace MyAutoIt
                 }
 
                 matcher.KnnMatch(observedDescriptors, matches, k, null);
+                lastMatches = matches;
                 lastObserved = matTest;
                 lastObservedKeyPoint = observedKeyPoints;
                 //Mat mat = new Mat();
@@ -337,6 +339,9 @@ namespace MyAutoIt
                 int nonZeroCount = CvInvoke.CountNonZero(uniqueMask);
                 if (nonZeroCount > 4)
                 {
+                    /*int nonZeroCount2 = Features2DToolbox.VoteForSizeAndOrientation(this[0].keyPoints, observedKeyPoints,
+                    matches, uniqueMask, 1.5, 20);
+                    Console.WriteLine("nonZeroCount2=" + nonZeroCount2);*/
                     return GetLabelFromMatches(matches);
                 }
                 else
