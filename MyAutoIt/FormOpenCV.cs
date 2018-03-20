@@ -210,16 +210,17 @@ namespace MyAutoIt
 
             SimpleFeatureDesc autoSkillFeatureDesc = new SimpleFeatureDesc();
             autoSkillFeatureDesc.cropPoint = new Point(0, 200);
-            autoSkillFeatureDesc.size = new Size(200, 220);
+            autoSkillFeatureDesc.size = new Size(50, 220);
             autoSkillFeatureDesc.rect = new Rectangle(new Point(0, 0), autoSkillFeatureDesc.size);
             //autoSkillFeatureDesc.maskPoint = new Point(35, 37);
             autoSkillFeatureDesc.colorFilter = new SimpleFeatureColorFilter(new MCvScalar(230-50, 200 -40 , 70-25), new MCvScalar(230 + 25, 200 + 25, 70 + 25));
             autoSkillFeatureDesc.features.Add(new SimpleFeatureInfo(@"Linage2\SIFT\Quest2", "Quest2"));
+            autoSkillFeatureDesc.features.Add(new SimpleFeatureInfo(@"Linage2\SIFT\Quest2Doing", "Quest2Doing"));
             SimpleFeature sf = new SimpleFeature(autoSkillFeatureDesc);
             sf.Load(true);
             foreach(SimpleFeatureData fd in sf)
             {
-                lstMat.Add(fd.mat);
+                //lstMat.Add(fd.mat);
             }
 
             /*String json = JsonConvert.SerializeObject(autoSkillFeatureDesc,Formatting.Indented);
@@ -260,12 +261,24 @@ namespace MyAutoIt
             {
                 Bitmap bmp = (Bitmap)Bitmap.FromFile(sd.filePath);
                 Console.WriteLine(sd.filePath +  " " + sf.GetFeature(bmp));
-                //Mat mat = new Mat();
+                Mat mat = sf.lastObserved.Clone();
                 //Features2DToolbox.DrawKeypoints(sf.lastObserved, sf.lastObservedKeyPoint, mat, new Bgr(Color.Blue));
-                Console.WriteLine(sf.MatchesToString(sf.lastMatches));
-                lstMat.Add(sf.lastObserved);
+                //Console.WriteLine(sf.MatchesToString(sf.lastMatches));
+                //lstMat.Add(sf.lastObserved);
+                //lstMat.Add(sf.lastMatchFeatureData.mat);
+                //Console.WriteLine(CVUtil.ToString(sf.lastObservedKeyPoint));
+                Rectangle rect = CVUtil.GetRect(sf.lastObservedKeyPoint);
+                CvInvoke.Rectangle(mat, rect, new MCvScalar(255, 255, 255), 1);
+                Mat matCol = new Mat();
+                Mat matRow = new Mat();
+                CvInvoke.Reduce(mat, matCol, ReduceDimension.SingleCol, ReduceType.ReduceSum,DepthType.Cv32S);
+                CvInvoke.Reduce(mat, matRow, ReduceDimension.SingleRow, ReduceType.ReduceSum, DepthType.Cv32S);
+                lstMat.Add(mat);
+                Console.WriteLine(CVUtil.ToString(matCol));
+                Console.WriteLine(CVUtil.ToString(matRow));
                 break;
             }
+            /*
             String[] testPath = { @"Linage2\SIFT\NoAuto", @"Linage2\SIFT\AutoNoSkill" };
             foreach(String path in testPath)
             {
@@ -287,7 +300,7 @@ namespace MyAutoIt
                     }
                     lstMat.Add(mat);
                 }
-            }
+            }*/
 
             //ShowKeyPoints();
             Refresh();

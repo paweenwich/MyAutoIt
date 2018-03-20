@@ -18,6 +18,25 @@ namespace MyAutoIt
 {
     public class CVUtil
     {
+        public static Rectangle GetRect(VectorOfKeyPoint vKeyPoint)
+        {
+            //Rectangle ret = new Rectangle(0,0,0,0);
+            int minx = 10000;
+            int miny = 10000;
+            int maxx = 0;
+            int maxy = 0;
+            for (int i = 0; i < vKeyPoint.Size; i++)
+            {
+                MKeyPoint p = vKeyPoint[i];
+                if (p.Point.X < minx) minx = (int)p.Point.X;
+                if (p.Point.X > maxx) maxx = (int)p.Point.X;
+                if (p.Point.Y < miny) miny = (int)p.Point.Y;
+                if (p.Point.Y > maxy) maxy = (int)p.Point.Y;
+
+
+            }
+            return new Rectangle(minx, miny, maxx - minx, maxy - miny);
+        }
         public static Mat crop_color_frame(Mat input, Rectangle crop_region)
         {
             Image<Bgr, Byte> buffer_im = input.ToImage<Bgr, Byte>();
@@ -198,6 +217,7 @@ namespace MyAutoIt
         public Mat lastObserved;
         public VectorOfKeyPoint lastObservedKeyPoint;
         public VectorOfVectorOfDMatch lastMatches;
+        public SimpleFeatureData lastMatchFeatureData;
         public static SimpleFeature CreateFromFile(String fileName)
         {
             String data = File.ReadAllText(fileName);
@@ -272,6 +292,30 @@ namespace MyAutoIt
                 }
             }
             String ret = labelCount.Keys.Aggregate((i, j) => labelCount[i] >= labelCount[j] ? i : j);
+            // Scan to find best imgIndex
+            Dictionary<int, int> imgIndexCount = new Dictionary<int, int>();
+            for (int i = 0; i < vDMatch.Size; i++)
+            {
+                VectorOfDMatch vMatch = vDMatch[i];
+                for (int j = 0; j < vMatch.Size; j++)
+                {
+                    MDMatch dmatch = vMatch[j];
+                    if(GetLabel(dmatch.ImgIdx) == ret)
+                    {
+                        if (imgIndexCount.ContainsKey(dmatch.ImgIdx))
+                        {
+                            imgIndexCount[dmatch.ImgIdx] += 1;
+                        }
+                        else
+                        {
+                            imgIndexCount[dmatch.ImgIdx] = 1;
+                        }
+                    }
+                }
+            }
+            int imgIndex = imgIndexCount.Keys.Aggregate((i, j) => imgIndexCount[i] >= imgIndexCount[j] ? i : j);
+            Console.WriteLine("imgIndex=" + imgIndex);
+            lastMatchFeatureData = this[imgIndex];
             return ret;
 
         }
@@ -339,9 +383,9 @@ namespace MyAutoIt
                 int nonZeroCount = CvInvoke.CountNonZero(uniqueMask);
                 if (nonZeroCount > 4)
                 {
-                    /*int nonZeroCount2 = Features2DToolbox.VoteForSizeAndOrientation(this[0].keyPoints, observedKeyPoints,
-                    matches, uniqueMask, 1.5, 20);
-                    Console.WriteLine("nonZeroCount2=" + nonZeroCount2);*/
+                    //int nonZeroCount2 = Features2DToolbox.VoteForSizeAndOrientation(this[0].keyPoints, observedKeyPoints,
+                    //matches, uniqueMask, 1.5, 20);
+                    //Console.WriteLine("nonZeroCount2=" + nonZeroCount2);
                     return GetLabelFromMatches(matches);
                 }
                 else
