@@ -189,10 +189,9 @@ namespace MyAutoIt
             List<String> ret = new List<string>();
             foreach(SimpleFeature sf in features)
             {
-                String label = sf.GetFeature(bmp);
-                if (label != "")
-                {
-                    ret.Add(label);
+                SimpleFeature.FeatureResult featureRet = sf.GetFeature(bmp);
+                if (featureRet != null) { 
+                    ret.Add(featureRet.label);
                 }
             }
             return ret.ToArray();

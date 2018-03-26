@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,6 +19,25 @@ namespace MyAutoIt
 {
     public class CVUtil
     {
+        public static Mat GetHistogramCol(Mat src)
+        {
+            Mat matCol = new Mat();
+            CvInvoke.Reduce(src, matCol, ReduceDimension.SingleCol, ReduceType.ReduceSum, DepthType.Cv32S);
+            return matCol;
+        }
+        public static Mat GetHistogramRow(Mat src)
+        {
+            Mat matRow = new Mat();
+            CvInvoke.Reduce(src, matRow, ReduceDimension.SingleRow, ReduceType.ReduceSum, DepthType.Cv32S);
+            return matRow;
+        }
+
+
+        public static Point PointFToPoint(PointF pf)
+        {
+            return new Point(((int)pf.X), ((int)pf.Y));
+        }
+
         public static Rectangle GetRect(VectorOfKeyPoint vKeyPoint)
         {
             //Rectangle ret = new Rectangle(0,0,0,0);
@@ -141,15 +161,28 @@ namespace MyAutoIt
             }*/
 
             StringBuilder sb = new StringBuilder();
-            sb.Append("[Dims=" + mat.Dims + " " + ToString(mat.SizeOfDimemsion));
-            for (int i = 0; i < mat.Height; i++)
+            sb.Append("[Dims=" + mat.Dims + " " + ToString(mat.SizeOfDimemsion) + " " + mat.ElementSize);
+            sb.Append("\n");
+            if (mat.ElementSize == 1)
+            {
+                byte[] data = new byte[mat.Width * mat.Height];
+                Marshal.Copy(mat.DataPointer, data, 0, mat.Width * mat.Height);
+                sb.Append(ToString(data));
+            }
+            else
+            {
+                int[] data = new int[mat.Width * mat.Height];
+                Marshal.Copy(mat.DataPointer, data, 0, mat.Width * mat.Height);
+                sb.Append(ToString(data));
+            }
+            /*for (int i = 0; i < mat.Height; i++)
             {
                 for (int j = 0; j < mat.Width; j++)
                 {
                     //Object data = mat.Data.GetValue(i* mat.Width + j);
                     //Console.WriteLine(JsonConvert.SerializeObject(data));
                 }
-            }
+            }*/
             sb.Append("\n]");
             return sb.ToString();
         }
@@ -270,11 +303,14 @@ namespace MyAutoIt
         {
             return this[index].label;
         }
-        public String GetLabelFromMatches(VectorOfVectorOfDMatch vDMatch)
+        public String GetLabelFromMatches(VectorOfVectorOfDMatch vDMatch, Mat uniqueMask)
         {
             Dictionary<String, int> labelCount = new Dictionary<string, int>();
             for (int i = 0; i < vDMatch.Size; i++)
             {
+                // Not need to use uniqueMask because we have multiple train feature for one class
+                //if (uniqueMask.GetData(i)[0] == 0) continue;
+
                 VectorOfDMatch vMatch = vDMatch[i];
                 for (int j = 0; j < vMatch.Size; j++)
                 {
@@ -336,7 +372,31 @@ namespace MyAutoIt
             sb.Append("\n" + indent + "]");
             return sb.ToString();
         }
-        public String GetFeature(Bitmap bmpSrc)
+        public class FeatureResult
+        {
+            public String label;
+            public Mat homography;
+            public SimpleFeatureData matchFeatureData;
+            public VectorOfKeyPoint keyPoint;
+            public Point[] GetMatchBoundingPoint()
+            {
+                Rectangle rect = CVUtil.GetRect(matchFeatureData.keyPoints);
+                PointF[] src = {
+                                new PointF(rect.X,rect.Y),new PointF(rect.X,rect.Y + rect.Height-1),
+                                new PointF(rect.X + rect.Width-1,rect.Y + rect.Height-1),new PointF(rect.X + rect.Width-1,rect.Y)
+                            };
+                PointF[] points = CvInvoke.PerspectiveTransform(src, homography);
+                foreach (var p in points)
+                {
+                    Console.WriteLine(p.ToString());
+                }
+                Point[] ap = Array.ConvertAll(points,
+                new Converter<PointF, Point>(CVUtil.PointFToPoint));
+                return ap;
+            }
+        }
+
+        public FeatureResult GetFeature(Bitmap bmpSrc)
         {
             Mat matTest = CVUtil.BitmapToMat(bmpSrc);
             matTest = ProcessImage(matTest);
@@ -383,58 +443,49 @@ namespace MyAutoIt
                 int nonZeroCount = CvInvoke.CountNonZero(uniqueMask);
                 if (nonZeroCount > 4)
                 {
-                    //int nonZeroCount2 = Features2DToolbox.VoteForSizeAndOrientation(this[0].keyPoints, observedKeyPoints,
-                    //matches, uniqueMask, 1.5, 20);
-                    //Console.WriteLine("nonZeroCount2=" + nonZeroCount2);
-                    return GetLabelFromMatches(matches);
-                }
-                else
-                {
-                    return "";
-                }
-                //Console.WriteLine(CVUtil.ToString(uniqueMask));
-                //Console.WriteLine("nonZeroCount=" + nonZeroCount);
-                /*                if (nonZeroCount < 4)
-                                {
-                                    return false;
-                                }
-                                foreach (SimpleFeatureData sd in this)
-                                {
-                                    try
-                                    {
-                                        int nonZeroCount2 = Features2DToolbox.VoteForSizeAndOrientation(sd.keyPoints, observedKeyPoints, matches, uniqueMask, 1.5, 20);
-                                        //Console.WriteLine("nonZeroCount2=" + nonZeroCount2);
-                                    }catch(Exception ex)
-                                    {
-                                        //Console.WriteLine(ex.Message);
-                                    }
-                                }
-                                */
-                /*if (nonZeroCount >= 4)
-                {
-                    nonZeroCount = Features2DToolbox.VoteForSizeAndOrientation(modelKeyPoints, observedKeyPoints,
-                        matches, mask, 1.5, 20);
-                    if (nonZeroCount >= 4)
+                    //Console.WriteLine(CVUtil.ToString(uniqueMask));
+                    String retLabel =  GetLabelFromMatches(matches, uniqueMask);
+                    SimpleFeatureData mfd = lastMatchFeatureData;
+                    try
+                    {
+                        //int nonZeroCount2 = Features2DToolbox.VoteForSizeAndOrientation(mfd.keyPoints, observedKeyPoints, matches, uniqueMask, 1.5, 20);
+                        //Console.WriteLine("nonZeroCount2=" + nonZeroCount2);
+                        if (nonZeroCount > 4)
+                        {
+
+                            Mat homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(mfd.keyPoints, observedKeyPoints, matches, uniqueMask, 2);
+                            /*Console.WriteLine(CVUtil.ToString(homography));
+                            Rectangle rect = CVUtil.GetRect(mfd.keyPoints);
+                            PointF[] src = {
+                                new PointF(rect.X,rect.Y),new PointF(rect.X,rect.Y + rect.Height-1),
+                                new PointF(rect.X + rect.Width-1,rect.Y + rect.Height-1),new PointF(rect.X + rect.Width-1,rect.Y)
+                            };
+                            PointF[] points = CvInvoke.PerspectiveTransform(src, homography);
+                            foreach (var p in points)
+                            {
+                                Console.WriteLine(p.ToString());
+                            }
+                            Point[] ap = Array.ConvertAll(points,
+                            new Converter<PointF, Point>(CVUtil.PointFToPoint));
+                            Mat testImage = matTest.Clone();
+                            CvInvoke.Polylines(testImage, ap, true, new MCvScalar(255, 0, 0));
+                            */
+                            //CvInvoke.Rectangle(testImage, new Rectangle(0, 0, 100, 100), new MCvScalar(255, 255, 0));
+                            //CvInvoke.Circle(testImage, new Point(100, 100), 50, new MCvScalar(255, 255, 0), -1);
+                            //lstMat.Add(testImage);
+                            FeatureResult ret = new FeatureResult();
+                            ret.keyPoint = observedKeyPoints;
+                            ret.label = retLabel;
+                            ret.homography = homography;
+                            ret.matchFeatureData = mfd;
+                            return ret;
+                        }
+                    }catch(Exception ex)
                     {
 
-                        homography = Features2DToolbox.GetHomographyMatrixFromMatchedFeatures(modelKeyPoints, observedKeyPoints, matches, mask, 2);
-                        PointF[] src = {
-                            new PointF(0,0),new PointF(0,modelImage.Height-1),new PointF(modelImage.Width-1,modelImage.Height-1),new PointF(modelImage.Width-1,0)
-                        };
-                        PointF[] points = CvInvoke.PerspectiveTransform(src, homography);
-                        foreach (var p in points)
-                        {
-                            Console.WriteLine(p.ToString());
-                        }
-                        Point[] ap = Array.ConvertAll(points,
-                        new Converter<PointF, Point>(PointFToPoint));
-
-                        CvInvoke.Polylines(testImage, ap, true, new MCvScalar(255, 0, 0));
-                        CvInvoke.Rectangle(testImage, new Rectangle(0, 0, 100, 100), new MCvScalar(255, 255, 0));
-                        CvInvoke.Circle(testImage, new Point(100, 100), 50, new MCvScalar(255, 255, 0), -1);
-                        lstMat.Add(testImage);
                     }
-                }*/
+                }
+                return null;
             }
         }
 
