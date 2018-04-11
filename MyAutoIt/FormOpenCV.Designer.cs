@@ -32,6 +32,8 @@
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.shoePointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pat2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pat1ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -50,7 +52,9 @@
             // 
             this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.testToolStripMenuItem,
-            this.shoePointsToolStripMenuItem});
+            this.shoePointsToolStripMenuItem,
+            this.pat1ToolStripMenuItem,
+            this.pat2ToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(66, 24);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -68,6 +72,20 @@
             this.shoePointsToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.shoePointsToolStripMenuItem.Text = "ShowPoints";
             this.shoePointsToolStripMenuItem.Click += new System.EventHandler(this.shoePointsToolStripMenuItem_Click);
+            // 
+            // pat2ToolStripMenuItem
+            // 
+            this.pat2ToolStripMenuItem.Name = "pat2ToolStripMenuItem";
+            this.pat2ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.pat2ToolStripMenuItem.Text = "Pat2";
+            this.pat2ToolStripMenuItem.Click += new System.EventHandler(this.pat2ToolStripMenuItem_Click);
+            // 
+            // pat1ToolStripMenuItem
+            // 
+            this.pat1ToolStripMenuItem.Name = "pat1ToolStripMenuItem";
+            this.pat1ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.pat1ToolStripMenuItem.Text = "Pat1";
+            this.pat1ToolStripMenuItem.Click += new System.EventHandler(this.pat1ToolStripMenuItem_Click);
             // 
             // FormOpenCV
             // 
@@ -93,5 +111,7 @@
         private System.Windows.Forms.ToolStripMenuItem debugToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem testToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem shoePointsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pat2ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pat1ToolStripMenuItem;
     }
 }

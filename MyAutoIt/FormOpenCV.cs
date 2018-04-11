@@ -298,6 +298,74 @@ namespace MyAutoIt
         {
             Refresh();
         }
+
+        private void pat2ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            StringBuilder sb = new StringBuilder();
+            const int numTest = 100;
+            const int numChoice = 5;
+            const int alwaysCorrect = 1;
+            const float scorePerTest = 3;
+            int[] correct = new int[numTest];
+            Random rand = new Random();
+            for(int i = 0; i < correct.Length; i++)
+            {
+                correct[i] = rand.Next(numChoice);
+                Console.WriteLine(correct[i]);
+            }
+            
+            
+            for(int i = 0; i < 138440; i++)
+            {
+                float score = 0;
+                for(int j = 0; j < numTest - alwaysCorrect; j++)
+                {
+                    int select = rand.Next(numChoice);
+                    if (select == correct[j])
+                    {
+                        score += scorePerTest;
+                    }
+                }
+                score += alwaysCorrect * scorePerTest;
+                sb.AppendLine(String.Format("{0:F2}", score));
+            }
+            Console.WriteLine("Done");
+            File.WriteAllText("pat2monkey.txt", sb.ToString());
+        }
+
+        private void pat1ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            StringBuilder sb = new StringBuilder();
+            const int numTest = 30;
+            const int numChoice = 5;
+            const int alwaysCorrect = 3;
+            const float scorePerTest = 6;
+            int[] correct = new int[numTest];
+            Random rand = new Random();
+            for (int i = 0; i < correct.Length; i++)
+            {
+                correct[i] = rand.Next(numChoice);
+                Console.WriteLine(correct[i]);
+            }
+
+
+            for (int i = 0; i < 138440; i++)
+            {
+                float score = 0;
+                for (int j = 0; j < numTest - alwaysCorrect; j++)
+                {
+                    int select = rand.Next(numChoice);
+                    if (select == correct[j])
+                    {
+                        score += scorePerTest;
+                    }
+                }
+                score += alwaysCorrect * scorePerTest;
+                sb.AppendLine(String.Format("{0:F2}", score));
+            }
+            Console.WriteLine("Done");
+            File.WriteAllText("pat1monkey.txt", sb.ToString());
+        }
     }
 
 
