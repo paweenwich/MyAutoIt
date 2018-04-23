@@ -135,7 +135,7 @@ stateTable["Auto"] = {
     {screen="Dead",cmd=ClickAt,x=1199,y=252},
     {screen="PartyRequest",cmd=ClickAt,x=900,y=56},
     {screen="HarvestExit",cmd=ClickAt,x=760,y=482},
-    {screen="QuestSelectB2",cmd=ClickAt,x=850,y=385},
+    {screen="QuestSelectB2",cmd=ClickAt,x=850,y=222},
     {screen="QuestSelectB3",cmd=ClickAt,x=480,y=385},
 --    {screen="QuestSelectB3",cmd=ClickAt,x=850,y=222},
     {screen="QuestSelected",cmd=ClickAt,x=850,y=600},

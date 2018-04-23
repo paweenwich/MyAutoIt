@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Performance1.psess = Performance1.psess
 	EndProjectSection
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "CarSolver", "CarSolver\CarSolver.pyproj", "{64CF3430-660D-4B4C-96EB-6CFDE0524864}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,12 @@ Global
 		{AEA9120C-835F-4B46-9296-5BA195FB91B7}.Release|Mixed Platforms.Build.0 = Release|x86
 		{AEA9120C-835F-4B46-9296-5BA195FB91B7}.Release|x86.ActiveCfg = Release|x86
 		{AEA9120C-835F-4B46-9296-5BA195FB91B7}.Release|x86.Build.0 = Release|x86
+		{64CF3430-660D-4B4C-96EB-6CFDE0524864}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64CF3430-660D-4B4C-96EB-6CFDE0524864}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{64CF3430-660D-4B4C-96EB-6CFDE0524864}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{64CF3430-660D-4B4C-96EB-6CFDE0524864}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64CF3430-660D-4B4C-96EB-6CFDE0524864}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{64CF3430-660D-4B4C-96EB-6CFDE0524864}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
