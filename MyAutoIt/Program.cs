@@ -18,7 +18,8 @@ namespace MyAutoIt
             //Application.Run(new Form1());
             //Application.Run(new CandyCrush());
             //Application.Run(new FormOpenCV());
-            Application.Run(new Linage2());
+            //Application.Run(new Linage2());
+            Application.Run(new AutoIt());
         }
     }
 }

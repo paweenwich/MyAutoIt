@@ -61,7 +61,7 @@ namespace MyAutoIt
             InitializeComponent();
             Console.SetOut(new RichTextWriter(txtDebug));
             dataPath = Application.StartupPath + @"\Linage2\";
-            //Reload();
+            Reload();
         }
         public void Reload()
         {
@@ -732,50 +732,8 @@ namespace MyAutoIt
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-
         }
 
-        private void minicapToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            //https://github.com/openstf/minicap/tree/98d5708531bc158ca0b143030a97149a5bd372eb
-            System.Net.Sockets.TcpClient clientSocket = new System.Net.Sockets.TcpClient();
-            clientSocket.Connect("127.0.0.1", 1313);
-            logDebug("Client Socket Program - Server Connected ...");
-            NetworkStream serverStream = clientSocket.GetStream();
-
-            //byte[] inStream = new byte[10025];
-            int numread = 0;
-            byte[] rawHeader = new byte[24];
-            numread = serverStream.Read(rawHeader, 0, rawHeader.Length);
-            RawSerializer<MinicapHeader> minicapHeaderSerializer = new RawSerializer<MinicapHeader>();
-            MinicapHeader header =  minicapHeaderSerializer.RawDeserialize(rawHeader);
-            logDebug(header.ToString());
-
-            /*byte[] rawFramwSize = new byte[4];
-            numread = serverStream.Read(rawFramwSize, 0, rawFramwSize.Length);
-            RawSerializer<MinicapFrameSize> minicapFrameSizeSerializer = new RawSerializer<MinicapFrameSize>();
-            MinicapFrameSize frameSize = minicapFrameSizeSerializer.RawDeserialize(rawFramwSize);
-            logDebug("" + frameSize.size);*/
-            for (int i = 0; i < 10; i++)
-            {
-                BinaryReader br = new BinaryReader(serverStream);
-                int frameSize = br.ReadInt32();
-                logDebug("" + frameSize);
-
-                byte[] rawFrameData = br.ReadBytes(frameSize);
-                logDebug("" + rawFrameData.Length);
-                File.WriteAllBytes("screen" + i + ".jpg", rawFrameData);
-            }
-            /*byte[] rawFrameData = new byte[frameSize];
-            while (serverStream.Length < rawFrameData.Length)
-            {
-                logDebug("" + serverStream.Length + "/" + frameSize);
-            }
-            numread = serverStream.Read(rawFrameData, 0, rawFrameData.Length);
-            logDebug("" + numread);
-            File.WriteAllBytes("screen.jpg", rawFrameData);
-            */
-        }
     }
 
     [StructLayout(LayoutKind.Explicit)]

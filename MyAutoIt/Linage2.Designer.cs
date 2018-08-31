@@ -62,7 +62,6 @@
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.chkAutoCapture = new System.Windows.Forms.CheckBox();
-            this.minicapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -235,8 +234,7 @@
             // 
             this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.addTaskToolStripMenuItem,
-            this.emguToolStripMenuItem,
-            this.minicapToolStripMenuItem});
+            this.emguToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(66, 24);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -373,13 +371,6 @@
             this.chkAutoCapture.UseVisualStyleBackColor = true;
             this.chkAutoCapture.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
-            // minicapToolStripMenuItem
-            // 
-            this.minicapToolStripMenuItem.Name = "minicapToolStripMenuItem";
-            this.minicapToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.minicapToolStripMenuItem.Text = "Minicap";
-            this.minicapToolStripMenuItem.Click += new System.EventHandler(this.minicapToolStripMenuItem_Click);
-            // 
             // Linage2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -450,6 +441,5 @@
         private System.Windows.Forms.ToolStripMenuItem clearToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem emguToolStripMenuItem;
         private System.Windows.Forms.CheckBox chkAutoCapture;
-        private System.Windows.Forms.ToolStripMenuItem minicapToolStripMenuItem;
     }
 }
