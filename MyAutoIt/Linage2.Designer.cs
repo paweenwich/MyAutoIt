@@ -242,14 +242,14 @@
             // addTaskToolStripMenuItem
             // 
             this.addTaskToolStripMenuItem.Name = "addTaskToolStripMenuItem";
-            this.addTaskToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
+            this.addTaskToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.addTaskToolStripMenuItem.Text = "AddTask";
             this.addTaskToolStripMenuItem.Click += new System.EventHandler(this.addTaskToolStripMenuItem_Click);
             // 
             // emguToolStripMenuItem
             // 
             this.emguToolStripMenuItem.Name = "emguToolStripMenuItem";
-            this.emguToolStripMenuItem.Size = new System.Drawing.Size(141, 26);
+            this.emguToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.emguToolStripMenuItem.Text = "Emgu";
             this.emguToolStripMenuItem.Click += new System.EventHandler(this.emguToolStripMenuItem_Click);
             // 

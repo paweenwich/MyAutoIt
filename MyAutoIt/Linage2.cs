@@ -27,6 +27,8 @@ using Emgu.CV.UI;
 using Emgu.CV.Features2D;
 using Emgu.CV.Util;
 using Emgu.CV.Flann;
+using System.Net.Sockets;
+using System.Runtime.InteropServices;
 
 namespace MyAutoIt
 {
@@ -189,10 +191,9 @@ namespace MyAutoIt
             List<String> ret = new List<string>();
             foreach(SimpleFeature sf in features)
             {
-                String label = sf.GetFeature(bmp);
-                if (label != "")
-                {
-                    ret.Add(label);
+                SimpleFeature.FeatureResult featureRet = sf.GetFeature(bmp);
+                if (featureRet != null) { 
+                    ret.Add(featureRet.label);
                 }
             }
             return ret.ToArray();
@@ -731,8 +732,51 @@ namespace MyAutoIt
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-
         }
+
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    struct MinicapHeader
+    {
+        [FieldOffset(0)]
+        public byte version;
+
+        [FieldOffset(1)]
+        public byte size;
+
+        [FieldOffset(2)]
+        public int pid;
+
+        [FieldOffset(6)]
+        public int displayWidth;
+
+        [FieldOffset(10)]
+        public int displayHeight;
+
+        [FieldOffset(14)]
+        public int virtualWidth;
+
+        [FieldOffset(18)]
+        public int virtualHeight;
+
+        [FieldOffset(22)]
+        public byte orientation;
+
+        [FieldOffset(23)]
+        public byte quirkFlag;
+
+        public override String ToString()
+        {
+            return String.Format("{0}x{1} {2}x{3} {4} {5}", displayWidth, displayHeight, virtualWidth, virtualHeight, pid, size);
+        }
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    struct MinicapFrameSize
+    {
+        [FieldOffset(0)]
+        public int size;
     }
 
     public class ComboDeviceItem

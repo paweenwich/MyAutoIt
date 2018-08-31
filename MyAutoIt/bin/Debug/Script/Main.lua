@@ -172,7 +172,7 @@ stateTable["Auto"] = {
     {screen="Main/Harvest",cmd=ClickAt,x=689,y=262},
     {screen="Main/HarvestDone",cmd=ClickAt,x=800,y=84},
 --    {screen="Main/PartyAutoNoSkill",cmd=ClickAt,x=874,y=683},
---    {screen="Main/Quest2",cmd=ClickAt,x=52,y=312},
+    {screen="Main/Quest22",cmd=ClickAt,x=52,y=312},
     {screen="Main/Quest2",cmd=ClickAt,x=91,y=400},
 	{screen="Main/Quest3",cmd=ClickAt,x=91,y=320},
     {screen="Login",cmd=ClickAt,x=625,y=610},
@@ -180,6 +180,22 @@ stateTable["Auto"] = {
     {screen="CharSelect",cmd=ClickAt,x=1079,y=647},
     
     {screen="CanNotReset",cmd=onCanNotReset,x=635,y=485},    
+    {screen="Resurrect",cmd=ClickAt,x=1100,y=470},
+    {screen="Dead",
+        cmd = function(tab)
+            currentState = "JustDead";
+            bot:ClickAt(1238,257);
+        end,
+    },
+};
+
+stateTable["JustDead"]={
+    {screen="Main",cmd = function(tab)
+            currentState = "Auto";
+            --bot:ClickAt(91,400);
+            bot:ClickAt(52,312);
+        end,
+    },
 };
 
 stateTable["Dead"] = {

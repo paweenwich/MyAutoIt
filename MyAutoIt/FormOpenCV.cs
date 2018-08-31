@@ -86,10 +86,6 @@ namespace MyAutoIt
             (new XmlSerializer(typeof(Image<Bgr, Byte>))).Serialize(new StringWriter(sb), imgsave);
             Console.WriteLine(sb.ToString());*/
         }
-        public static Point PointFToPoint(PointF pf)
-        {
-            return new Point(((int)pf.X), ((int)pf.Y));
-        }
 
         public bool hasFeature(String folder)
         {
@@ -154,7 +150,7 @@ namespace MyAutoIt
                             Console.WriteLine(p.ToString());
                         }
                         Point[] ap = Array.ConvertAll(points,
-                        new Converter<PointF, Point>(PointFToPoint));
+                        new Converter<PointF, Point>(CVUtil.PointFToPoint));
 
                         CvInvoke.Polylines(testImage, ap, true, new MCvScalar(255, 0, 0));
                         CvInvoke.Rectangle(testImage, new Rectangle(0, 0, 100, 100), new MCvScalar(255, 255, 0));
@@ -209,33 +205,21 @@ namespace MyAutoIt
         {
 
             SimpleFeatureDesc autoSkillFeatureDesc = new SimpleFeatureDesc();
-            autoSkillFeatureDesc.cropPoint = new Point(0, 200);
-            autoSkillFeatureDesc.size = new Size(200, 220);
+            autoSkillFeatureDesc.cropPoint = new Point(340, 150);
+            autoSkillFeatureDesc.size = new Size(600, 300);
             autoSkillFeatureDesc.rect = new Rectangle(new Point(0, 0), autoSkillFeatureDesc.size);
             //autoSkillFeatureDesc.maskPoint = new Point(35, 37);
-            autoSkillFeatureDesc.colorFilter = new SimpleFeatureColorFilter(new MCvScalar(230-50, 200 -40 , 70-25), new MCvScalar(230 + 25, 200 + 25, 70 + 25));
-            autoSkillFeatureDesc.features.Add(new SimpleFeatureInfo(@"Linage2\SIFT\Quest2", "Quest2"));
+            autoSkillFeatureDesc.colorFilter = new SimpleFeatureColorFilter(new MCvScalar(16-10, 149 -50 , 106-50), new MCvScalar(16 + 50, 149 + 50, 106 + 50));
+            autoSkillFeatureDesc.features.Add(new SimpleFeatureInfo(@"Linage2\SIFT\QuestA", "QuestA"));
+            //autoSkillFeatureDesc.features.Add(new SimpleFeatureInfo(@"Linage2\SIFT\Quest2Doing", "Quest2Doing"));
             SimpleFeature sf = new SimpleFeature(autoSkillFeatureDesc);
             sf.Load(true);
-            foreach(SimpleFeatureData fd in sf)
-            {
-                lstMat.Add(fd.mat);
-            }
 
-            /*String json = JsonConvert.SerializeObject(autoSkillFeatureDesc,Formatting.Indented);
+            String json = JsonConvert.SerializeObject(autoSkillFeatureDesc,Formatting.Indented);
             autoSkillFeatureDesc = JsonConvert.DeserializeObject<SimpleFeatureDesc>(json);
             Console.WriteLine(json);
-            */
-            //Mat mask = new Mat(size, DepthType.Cv8U, 1);
-            //CvInvoke.Rectangle(mask, rect, new MCvScalar(255, 255, 255), -1);
-            //CvInvoke.Circle(mask, new Point(35, 37), 23, new MCvScalar(0, 0, 0), -1);
-            //SimpleFeature sf = new SimpleFeature(autoSkillFeatureDesc);
-            //SimpleFeature sf = new SimpleFeature(new Point(842, 646), size, mask);
-            //sf.SetColorFilter(new MCvScalar(200, 150, 0), new MCvScalar(255, 250, 200));
-            //sf.AddFeature(@"Linage2\SIFT\AutoNoSkill", "AutoNoSkill", true);
-            //sf.AddFeature(@"Linage2\SIFT\AutoSkill", "AutoSkill", true);
-            //sf.AddFeature(@"Linage2\SIFT\NoAuto", "NoAuto",0, true);
-            //SimpleFeature sf = SimpleFeature.CreateFromFile(@"Linage2\SIFT\AutoSkill.json");
+            
+            //SimpleFeature sf = SimpleFeature.CreateFromFile(@"Linage2\SIFT\Quest2.json");
             //sf.Load(true);
 
             foreach (SimpleFeatureData sd in sf)
@@ -255,39 +239,55 @@ namespace MyAutoIt
                 //log(CVUtil.ToString(sd.keyPoints));
                 //log(CVUtil.ToString(sd.descriptors));
                 //Refresh();
+                Mat mat = new Mat();
+                CvInvoke.Resize(sd.mat, mat, new Size(300,150));
+                lstMat.Add(mat);
             }
             foreach (SimpleFeatureTestData sd in sf.testData)
             {
                 Bitmap bmp = (Bitmap)Bitmap.FromFile(sd.filePath);
-                Console.WriteLine(sd.filePath +  " " + sf.GetFeature(bmp));
-                //Mat mat = new Mat();
-                //Features2DToolbox.DrawKeypoints(sf.lastObserved, sf.lastObservedKeyPoint, mat, new Bgr(Color.Blue));
-                Console.WriteLine(sf.MatchesToString(sf.lastMatches));
-                lstMat.Add(sf.lastObserved);
-                break;
+                SimpleFeature.FeatureResult featureRet = sf.GetFeature(bmp);
+                if (featureRet != null)
+                {
+                    FileInfo fInto = new FileInfo(sd.filePath);
+                    String correctLabel = fInto.Directory.Name;
+                    Console.WriteLine(sd.filePath + " " + featureRet.label);
+                    Mat testImage = sf.lastObserved.Clone();
+                    if (correctLabel == featureRet.label)
+                    {
+                        CvInvoke.Polylines(testImage, featureRet.GetMatchBoundingPoint(), true, new MCvScalar(255, 0, 0),2);
+                    }else
+                    {
+                        CvInvoke.Polylines(testImage, featureRet.GetMatchBoundingPoint(), true, new MCvScalar(255, 255, 255));
+                    }
+                    lstMat.Add(testImage);
+                }
+                else
+                {
+                    Console.WriteLine(sd.filePath + " NOT FOUND");
+                    lstMat.Add(sf.lastObserved.Clone());
+                }
+                //break;
             }
-            String[] testPath = { @"Linage2\SIFT\NoAuto", @"Linage2\SIFT\AutoNoSkill" };
+            /*
+            String[] testPath = { @"Linage2\SIFT\Quest2NoQuest"};
             foreach(String path in testPath)
             {
                 FileInfo[] files = Utils.GetFilesByExtensions(new DirectoryInfo(path), ".jpg", ".png").ToArray();
                 foreach (FileInfo f in files)
                 {
                     Bitmap bmp = (Bitmap)Bitmap.FromFile(f.FullName);
-                    String label = sf.GetFeature(bmp);
-                    Console.WriteLine(f.FullName + " " + label);
+                    SimpleFeature.FeatureResult featureRet = sf.GetFeature(bmp);
                     Mat mat = new Mat();
-                    if (label == "")
-                    {
-                        CvInvoke.Resize(sf.lastObserved, mat, new Size(50, 50));
-                    }else
+                    if (featureRet != null)
                     {
                         mat = sf.lastObserved.Clone();
-                        CvInvoke.PutText(mat, label, new Point(0, 20), FontFace.HersheyPlain, 1, new MCvScalar(255, 255, 255));
+                        CvInvoke.PutText(mat, featureRet.label, new Point(0, 20), FontFace.HersheyPlain, 1, new MCvScalar(255, 255, 255));
                         Console.WriteLine(sf.MatchesToString(sf.lastMatches));
+                        lstMat.Add(mat);
                     }
-                    lstMat.Add(mat);
                 }
-            }
+            }*/
 
             //ShowKeyPoints();
             Refresh();
@@ -297,6 +297,74 @@ namespace MyAutoIt
         private void FormOpenCV_SizeChanged(object sender, EventArgs e)
         {
             Refresh();
+        }
+
+        private void pat2ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            StringBuilder sb = new StringBuilder();
+            const int numTest = 100;
+            const int numChoice = 5;
+            const int alwaysCorrect = 1;
+            const float scorePerTest = 3;
+            int[] correct = new int[numTest];
+            Random rand = new Random();
+            for(int i = 0; i < correct.Length; i++)
+            {
+                correct[i] = rand.Next(numChoice);
+                Console.WriteLine(correct[i]);
+            }
+            
+            
+            for(int i = 0; i < 138440; i++)
+            {
+                float score = 0;
+                for(int j = 0; j < numTest - alwaysCorrect; j++)
+                {
+                    int select = rand.Next(numChoice);
+                    if (select == correct[j])
+                    {
+                        score += scorePerTest;
+                    }
+                }
+                score += alwaysCorrect * scorePerTest;
+                sb.AppendLine(String.Format("{0:F2}", score));
+            }
+            Console.WriteLine("Done");
+            File.WriteAllText("pat2monkey.txt", sb.ToString());
+        }
+
+        private void pat1ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            StringBuilder sb = new StringBuilder();
+            const int numTest = 30;
+            const int numChoice = 5;
+            const int alwaysCorrect = 3;
+            const float scorePerTest = 6;
+            int[] correct = new int[numTest];
+            Random rand = new Random();
+            for (int i = 0; i < correct.Length; i++)
+            {
+                correct[i] = rand.Next(numChoice);
+                Console.WriteLine(correct[i]);
+            }
+
+
+            for (int i = 0; i < 138440; i++)
+            {
+                float score = 0;
+                for (int j = 0; j < numTest - alwaysCorrect; j++)
+                {
+                    int select = rand.Next(numChoice);
+                    if (select == correct[j])
+                    {
+                        score += scorePerTest;
+                    }
+                }
+                score += alwaysCorrect * scorePerTest;
+                sb.AppendLine(String.Format("{0:F2}", score));
+            }
+            Console.WriteLine("Done");
+            File.WriteAllText("pat1monkey.txt", sb.ToString());
         }
     }
 
