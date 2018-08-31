@@ -1,3 +1,6 @@
+--NOX adb connect 127.0.0.1:62001
+--adb forward tcp:52736 tcp:52736 
+
 Environment = luanet.import_type 'System.Environment'
 function string.starts(String,Start)
    return string.sub(String,1,string.len(Start))==Start
@@ -132,12 +135,20 @@ stateTable["Auto"] = {
     {screen="QuestDo",cmd=ClickAt,x=763,y=613},
     {screen="QuestAccept",cmd=ClickAt,x=763,y=613},
     {screen="Move",cmd=ClickAt,x=511,y=519},
-    {screen="Dead",cmd=ClickAt,x=1199,y=252},
+    {screen="Dead",
+		cmd=function(tab)
+			currentState = "Dead";
+			bot:ClickAt(1234,252);
+        end;
+	},
     {screen="PartyRequest",cmd=ClickAt,x=900,y=56},
     {screen="HarvestExit",cmd=ClickAt,x=760,y=482},
-    {screen="QuestSelectB2",cmd=ClickAt,x=705,y=385},
-    {screen="QuestSelectB3",cmd=ClickAt,x=850,y=222},
-    {screen="QuestSelected",cmd=ClickAt,x=850,y=600},
+--    {screen="QuestSelectB2",cmd=ClickAt,x=705,y=385},
+--    {screen="QuestSelectB2",cmd=ClickAt,x=550,y=385},
+    {screen="QuestSelectB2",cmd=ClickAt,x=500,y=300},
+--    {screen="QuestSelectB3",cmd=ClickAt,x=380,y=385}, --222},
+    {screen="QuestSelectB3",cmd=ClickAt,x=850,y=222}, --222},
+    {screen="QuestSelected",cmd=ClickAt,x=900,y=650},
     {screen="QuestConfirm",cmd=ClickAt,x=760,y=500},
     {screen="ClearDungeon",cmd=onDungeonClear,x=956,y=635},
     {screen="DungeonEXP/NoMore",cmd=ClickAt,x=1240,y=40},   -- Exit
@@ -156,18 +167,29 @@ stateTable["Auto"] = {
         end,
     x=1242,y=40},
     
-    --{screen="Main/Success",cmd=ClickAt,x=260,y=330},
-    {screen="Main/Success",cmd=ClickAt,x=260,y=407},
+    {screen="Main/Success",cmd=ClickAt,x=260,y=330},
+    {screen="Main/Success2",cmd=ClickAt,x=260,y=407},
     {screen="Main/Harvest",cmd=ClickAt,x=689,y=262},
     {screen="Main/HarvestDone",cmd=ClickAt,x=800,y=84},
 --    {screen="Main/PartyAutoNoSkill",cmd=ClickAt,x=874,y=683},
 --    {screen="Main/Quest2",cmd=ClickAt,x=52,y=312},
     {screen="Main/Quest2",cmd=ClickAt,x=91,y=400},
+	{screen="Main/Quest3",cmd=ClickAt,x=91,y=320},
     {screen="Login",cmd=ClickAt,x=625,y=610},
     {screen="Ads",cmd=ClickAt,x=1257,y=21},
     {screen="CharSelect",cmd=ClickAt,x=1079,y=647},
     
     {screen="CanNotReset",cmd=onCanNotReset,x=635,y=485},    
+};
+
+stateTable["Dead"] = {
+	{screen="Main",
+		cmd=function(tab)
+			currentState = "Auto";
+			bot:ClickAt(91,320);
+        end;
+
+	},
 };
 
 stateTable["AutoQuest"] = {
