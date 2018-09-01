@@ -23,7 +23,7 @@ namespace MyAutoIt
     {
         MyLogger logger;
         AutoItConfigure configure;
-        String configPath = Application.StartupPath + @"\Script";
+        String configPath = Application.StartupPath + @"\..\..";
         String testDataPath = Application.StartupPath + @"\Linage2Test";
         String dataPath = Application.StartupPath + @"\Linage2";
         //String imagePath = Application.StartupPath + @"\Linage2\Main";
@@ -34,11 +34,15 @@ namespace MyAutoIt
             Accord.Math.Random.Generator.Seed = 0;
             logger = new MyLogger(txtDebug);
             logger.logStr("Start");
+            String configFile = configPath + @"\AutoIt.json";
             try
             {
-                configure = JsonConvert.DeserializeObject<AutoItConfigure>(File.ReadAllText(configPath + @"\AutoIt.json"));
+                
+                configure = JsonConvert.DeserializeObject<AutoItConfigure>(File.ReadAllText(configFile));
+                
             }catch(Exception ex)
             {
+                logger.logError("Config not found [" + configFile + "]");
                 configure = new AutoItConfigure();
             }
             logger.logStr(JsonConvert.SerializeObject(configure,Formatting.Indented));

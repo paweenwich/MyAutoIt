@@ -1,0 +1,14 @@
+{
+  "trainFolders": [
+    "WeeklyQuest",
+    "Main",
+    "DailyQuest",
+    "Move",
+    "Dead"
+  ],
+  "imageFilter": "*.png",
+  "imageFilterOut": "mask.png",
+  "areas": [
+    "0, 0, 1280, 720"
+  ]
+}
