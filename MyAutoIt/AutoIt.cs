@@ -3,7 +3,10 @@ using Accord.Imaging;
 using Accord.MachineLearning;
 using Accord.MachineLearning.VectorMachines;
 using Accord.MachineLearning.VectorMachines.Learning;
+using Accord.Math;
 using Accord.Math.Optimization.Losses;
+using Accord.Neuro;
+using Accord.Neuro.Learning;
 using Accord.Statistics.Kernels;
 using Newtonsoft.Json;
 using System;
@@ -156,15 +159,76 @@ namespace MyAutoIt
 
         private void test3ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Bitmap myImage = (Bitmap)Bitmap.FromFile(dataPath + @"\main\4yjfo4fa53b.png");
-            Bitmap bmp = Utils.CreateMaskBitmap(myImage.Size, new Rectangle[] { new Rectangle(10, 10, 100, 100) });
-            myImage.ApplyMask(bmp);
-            //Graphics gx = Graphics.FromImage(myImage);
-            //ImageAttributes imageAttr = new ImageAttributes();
-            //imageAttr.SetColorKey(Color.White, Color.White, ColorAdjustType.Default);
-            //gx.DrawImage(bmp, new Rectangle(0, 0, myImage.Width, myImage.Height), 0, 0, myImage.Width, myImage.Height, GraphicsUnit.Pixel, imageAttr);
-            myImage.Save("test.png");
+            //Bitmap myImage = (Bitmap)Bitmap.FromFile(dataPath + @"\main\4yjfo4fa53b.png");
+            //Bitmap bmp = Utils.CreateMaskBitmap(myImage.Size, new Rectangle[] { new Rectangle(10, 10, 100, 100) });
+            //myImage.ApplyMask(bmp);
+            //myImage.Save("test.png");
+            List<ImageTrainData> trainData = GetAllTrainImageData(dataPath);
+            List<ImageTrainData> testDataSet = GetAllTrainImageData(testDataPath);
+
+            int[] labelIndexs = trainData.GetLabelIndexs();
+            String[] labels = trainData.GetLabels();
+            var images = trainData.GetBitmaps();
+            var bow = Accord.IO.Serializer.Load<BagOfVisualWords>(dataPath + @"\train.bow");
+            double[][] features = bow.Transform(images);
+            int numOutput = trainData.GetNumOutput();
+
+
+            var function = new SigmoidFunction();
+            var network = new ActivationNetwork(function, 10, 5,numOutput);
+            new NguyenWidrow(network).Randomize();
+
+            
+            // Teach the network using parallel Rprop:
+            var teacher = new ParallelResilientBackpropagationLearning(network);
+
+            //creat output
+            double[][] outputs = trainData.GetOutputs(numOutput);
+            double error = 1.0;
+            while (error > 1e-5)
+            {
+                error = teacher.RunEpoch(features, outputs);
+                logger.logStr(String.Format("{0}",error));
+                Application.DoEvents();
+                //int errCount = TestNetwork(bow, network, trainData,true);
+                //if(errCount == 0)
+                //{
+                    int testErrorCount = TestNetwork(bow, network, testDataSet,true);
+                    logger.logStr(String.Format("{0}", testErrorCount));
+                //}
+            }
+            logger.logStr("Done");
+            Accord.IO.Serializer.Save(network, dataPath + @"\train.net");
+            //TestNetwork(bow, network, trainData);
+            TestNetwork(bow, network, testDataSet);
         }
+
+        public int TestNetwork(dynamic bow, dynamic network, List<ImageTrainData> trainData,bool flgSilence = false)
+        {
+            var images = trainData.GetBitmaps();
+            double[][] features = bow.Transform(images);
+            int[] labelIndexs = trainData.GetLabelIndexs();
+            String[] labels = trainData.GetLabels();
+            int errorCount = 0;
+            for (int i = 0; i < features.Length; i++)
+            {
+                double[] answer = network.Compute(features[i]);
+
+                int expected = labelIndexs[i];
+                int actual; answer.Max(out actual);
+                if (actual == expected)
+                {
+                    if(flgSilence==false) logger.logStr(trainData[i].ToString() + " " + actual);
+                }
+                else
+                {
+                    if (flgSilence == false) logger.logError(trainData[i].ToString() + " " + actual);
+                    errorCount++;
+                }
+            }
+            return errorCount;
+        }
+
 
         public void TestData(dynamic bow, MulticlassSupportVectorMachine<Linear> machine, List<ImageTrainData> trainData)
         {
@@ -264,6 +328,29 @@ namespace MyAutoIt
                 ret.Add(a.label);
             }
             return ret.ToArray();
+        }
+        public static int GetNumOutput(this List<ImageTrainData> _self)
+        {
+            var item = _self.Max(x => x.labelIndex);
+            return item + 1;
+        }
+        public static double[][] GetOutputs(this List<ImageTrainData> _self,int numOutput)
+        {
+            int[] labelIndexs = _self.GetLabelIndexs();
+            double[][] outputs = new double[_self.Count][];
+            for (int i = 0; i < _self.Count; i++)
+            {
+                outputs[i] = new double[numOutput];
+                for (int j = 0; j < numOutput; j++)
+                {
+                    outputs[i][j] = 0;
+                    if (j == labelIndexs[i])
+                    {
+                        outputs[i][j] = 1;
+                    }
+                }
+            }
+            return outputs;
         }
 
         public static void Show(this BagOfVisualWords bow)

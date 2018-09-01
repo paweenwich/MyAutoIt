@@ -167,7 +167,7 @@ stateTable["Auto"] = {
         end,
     x=1242,y=40},
     
-    {screen="Main/Success",cmd=ClickAt,x=260,y=330},
+--    {screen="Main/Success",cmd=ClickAt,x=260,y=330},
     {screen="Main/Success2",cmd=ClickAt,x=260,y=407},
     {screen="Main/Harvest",cmd=ClickAt,x=689,y=262},
     {screen="Main/HarvestDone",cmd=ClickAt,x=800,y=84},
@@ -175,6 +175,7 @@ stateTable["Auto"] = {
     {screen="Main/Quest22",cmd=ClickAt,x=52,y=312},
     {screen="Main/Quest2",cmd=ClickAt,x=91,y=400},
 	{screen="Main/Quest3",cmd=ClickAt,x=91,y=320},
+    {screen="Main/Quest4",cmd=ClickAt,x=91,y=400},	
     {screen="Login",cmd=ClickAt,x=625,y=610},
     {screen="Ads",cmd=ClickAt,x=1257,y=21},
     {screen="CharSelect",cmd=ClickAt,x=1079,y=647},
