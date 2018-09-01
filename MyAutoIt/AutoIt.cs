@@ -1,4 +1,6 @@
-﻿using Accord.Imaging;
+﻿using Accord;
+using Accord.Imaging;
+using Accord.MachineLearning;
 using Accord.MachineLearning.VectorMachines;
 using Accord.MachineLearning.VectorMachines.Learning;
 using Accord.Math.Optimization.Losses;
@@ -21,15 +23,23 @@ namespace MyAutoIt
     {
         MyLogger logger;
         AutoItConfigure configure;
+        String testDataPath = Application.StartupPath + @"\Linage2Test";
         String dataPath = Application.StartupPath + @"\Linage2";
         //String imagePath = Application.StartupPath + @"\Linage2\Main";
 
         public AutoIt()
         {
             InitializeComponent();
-            logger = new MyLogger();
+            Accord.Math.Random.Generator.Seed = 0;
+            logger = new MyLogger(txtDebug);
             logger.logStr("Start");
-            configure = JsonConvert.DeserializeObject<AutoItConfigure>(File.ReadAllText(dataPath + @"\AutoIt.json"));
+            try
+            {
+                configure = JsonConvert.DeserializeObject<AutoItConfigure>(File.ReadAllText(dataPath + @"\AutoIt.json"));
+            }catch(Exception ex)
+            {
+                configure = new AutoItConfigure();
+            }
             logger.logStr(JsonConvert.SerializeObject(configure,Formatting.Indented));
         }
 
@@ -56,21 +66,23 @@ namespace MyAutoIt
             return ret;
         }
 
-        public ImageFileData[] GetImagesFromDir(String folder,String filter="*.png", String filterOut = "mask.png")
+        public ImageFileData[] GetImagesFromDir(String folder, String filter = "*.png", String filterOut = "mask.png")
         {
             List<ImageFileData> ret = new List<ImageFileData>();
             DirectoryInfo d = new DirectoryInfo(folder);
-            FileInfo[] Files = d.GetFiles(filter);
-            foreach (FileInfo file in Files)
-            {
-                //Console.WriteLine(file.FullName);
-                if (file.Name.Equals(filterOut, StringComparison.InvariantCultureIgnoreCase))
+            if (d.Exists) { 
+                FileInfo[] Files = d.GetFiles(filter);
+                foreach (FileInfo file in Files)
                 {
-                    logger.logStr("Skip " + file.FullName);
-                    continue;
+                    //Console.WriteLine(file.FullName);
+                    if (file.Name.Equals(filterOut, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        logger.logStr("Skip " + file.FullName);
+                        continue;
+                    }
+                    Bitmap bmp = (Bitmap)Bitmap.FromFile(file.FullName);
+                    ret.Add(new ImageFileData() { fileName = file.FullName, image = bmp });
                 }
-                Bitmap bmp = (Bitmap)Bitmap.FromFile(file.FullName);
-                ret.Add(new ImageFileData() {fileName = file.FullName,image = bmp });
             }
             return ret.ToArray();
         }
@@ -80,8 +92,12 @@ namespace MyAutoIt
 
             List<ImageTrainData> trainData = GetAllTrainImageData(dataPath);
             var bow = BagOfVisualWords.Create(numberOfWords: 10);
+            //var bow = BagOfVisualWords.Create(new BinarySplit(10));
+            
             var images = trainData.GetBitmaps();
+            //bow.Learn(images,new double[] {1,1,1,1, 1, 1, 1, 1, 1, 1, 1, 1, 4 });
             bow.Learn(images);
+            Accord.IO.Serializer.Save(bow, dataPath + @"\train.bow");
             double[][] features = bow.Transform(images);
             int[] labelIndexs = trainData.GetLabelIndexs();
             String[] labels = trainData.GetLabels();
@@ -107,41 +123,22 @@ namespace MyAutoIt
                 }
             };
 
-
-
             // Obtain a learned machine
-
             var svm = teacher.Learn(features, labelIndexs);
-
             logger.logStr("Learn Done");
             //bow.Save();
             Accord.IO.Serializer.Save(svm, dataPath + @"\train.svm");
+            TestData(bow, svm, trainData);
         }
 
         private void test2ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<ImageTrainData> trainData = GetAllTrainImageData(dataPath);
-            var bow = BagOfVisualWords.Create(numberOfWords: 10);
-            var images = trainData.GetBitmaps();
-            bow.Learn(images);
-            double[][] features = bow.Transform(images);
-            int[] labelIndexs = trainData.GetLabelIndexs();
-            String[] labels = trainData.GetLabels();
-
+            //List<ImageTrainData> trainDataSet = GetAllTrainImageData(dataPath);
+            List<ImageTrainData> testDataSet = GetAllTrainImageData(testDataPath);
+            var bow = Accord.IO.Serializer.Load<BagOfVisualWords>(dataPath + @"\train.bow");
+            bow.Show();
             var machine = Accord.IO.Serializer.Load<MulticlassSupportVectorMachine<Linear>>(dataPath + @"\train.svm");
-            int[] prediction = machine.Decide(features);
-            double[] scores = machine.Score(features);
-            double[][] prob =  machine.Probabilities(features);
-            for (int i=0;i < prediction.Length; i++)
-            {
-                logger.logStr(trainData[i].ToString() + " " + prediction[i] + " " + scores[i] + " " + prob[i][prediction[i]]);
-            }
-            double error = new ZeroOneLoss(labelIndexs).Loss(prediction);
-            logger.logStr("" + error);
-            //ImageFileData[] images = GetImagesFromDir(imagePath);
-            //double[][] features = bow.Transform(images.GetBitmaps());
-            //logger.logStr("" + features[0].Length);
-
+            TestData(bow, machine, testDataSet);
 
         }
 
@@ -151,6 +148,31 @@ namespace MyAutoIt
             {
                 logger.logStr(a.ToString());
             }
+        }
+
+        public void TestData(dynamic bow, MulticlassSupportVectorMachine<Linear> machine, List<ImageTrainData> trainData)
+        {
+            var images = trainData.GetBitmaps();
+            double[][] features = bow.Transform(images);
+            int[] labelIndexs = trainData.GetLabelIndexs();
+            String[] labels = trainData.GetLabels();
+
+            int[] prediction = machine.Decide(features);
+            double[] scores = machine.Score(features);
+            double[][] prob = machine.Probabilities(features);
+            for (int i = 0; i < prediction.Length; i++)
+            {
+                if (prediction[i] != trainData[i].labelIndex)
+                {
+                    logger.logError(trainData[i].ToString() + " " + prediction[i] + " " + scores[i] + " " + prob[i][prediction[i]]);
+                }
+                else
+                {
+                    logger.logStr(trainData[i].ToString() + " " + prediction[i] + " " + scores[i] + " " + prob[i][prediction[i]]);
+                }
+            }
+            double error = new ZeroOneLoss(labelIndexs).Loss(prediction);
+            logger.logStr("" + error);
         }
     }
 
@@ -172,7 +194,7 @@ namespace MyAutoIt
 
     public class AutoItConfigure
     {
-        public String[] trainFolders;
+        public String[] trainFolders = new string[] { };
         public String imageFilter = "*.png";
         public String imageFilterOut = "mask.png";
     }
@@ -214,6 +236,27 @@ namespace MyAutoIt
                 ret.Add(a.label);
             }
             return ret.ToArray();
+        }
+
+        public static void Show(this BagOfVisualWords bow)
+        {
+            // We can also check some statistics about the dataset:
+            int numberOfImages = bow.Statistics.TotalNumberOfInstances; // 6
+
+            // Statistics about all the descriptors that have been extracted:
+            int totalDescriptors = bow.Statistics.TotalNumberOfDescriptors; // 4132
+            double totalMean = bow.Statistics.TotalNumberOfDescriptorsPerInstance.Mean; // 688.66666666666663
+            double totalVar = bow.Statistics.TotalNumberOfDescriptorsPerInstance.Variance; // 96745.866666666669
+            IntRange totalRange = bow.Statistics.TotalNumberOfDescriptorsPerInstanceRange; // [409, 1265]
+            Console.WriteLine(String.Format("{0} {1} {2} {3}", totalDescriptors, totalMean, totalVar, totalRange.ToString()));
+            
+
+            // Statistics only about the descriptors that have been actually used:
+            int takenDescriptors = bow.Statistics.NumberOfDescriptorsTaken; // 4132
+            double takenMean = bow.Statistics.NumberOfDescriptorsTakenPerInstance.Mean; // 688.66666666666663
+            double takenVar = bow.Statistics.NumberOfDescriptorsTakenPerInstance.Variance; // 96745.866666666669
+            IntRange takenRange = bow.Statistics.NumberOfDescriptorsTakenPerInstanceRange; // [409, 1265]
+            Console.WriteLine(String.Format("{0} {1} {2} {3}", takenDescriptors, takenMean, takenVar, takenRange.ToString()));
         }
     }
 }

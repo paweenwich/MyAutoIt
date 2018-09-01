@@ -39,11 +39,11 @@
             // 
             // txtDebug
             // 
-            this.txtDebug.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.txtDebug.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txtDebug.Font = new System.Drawing.Font("Courier New", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtDebug.Location = new System.Drawing.Point(0, 31);
+            this.txtDebug.Location = new System.Drawing.Point(0, 28);
             this.txtDebug.Name = "txtDebug";
-            this.txtDebug.Size = new System.Drawing.Size(726, 441);
+            this.txtDebug.Size = new System.Drawing.Size(726, 444);
             this.txtDebug.TabIndex = 9;
             this.txtDebug.Text = "";
             // 
@@ -71,21 +71,21 @@
             // test1ToolStripMenuItem
             // 
             this.test1ToolStripMenuItem.Name = "test1ToolStripMenuItem";
-            this.test1ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.test1ToolStripMenuItem.Size = new System.Drawing.Size(119, 26);
             this.test1ToolStripMenuItem.Text = "Test1";
             this.test1ToolStripMenuItem.Click += new System.EventHandler(this.test1ToolStripMenuItem_Click);
             // 
             // test2ToolStripMenuItem
             // 
             this.test2ToolStripMenuItem.Name = "test2ToolStripMenuItem";
-            this.test2ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.test2ToolStripMenuItem.Size = new System.Drawing.Size(119, 26);
             this.test2ToolStripMenuItem.Text = "Test2";
             this.test2ToolStripMenuItem.Click += new System.EventHandler(this.test2ToolStripMenuItem_Click);
             // 
             // test3ToolStripMenuItem
             // 
             this.test3ToolStripMenuItem.Name = "test3ToolStripMenuItem";
-            this.test3ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.test3ToolStripMenuItem.Size = new System.Drawing.Size(119, 26);
             this.test3ToolStripMenuItem.Text = "Test3";
             this.test3ToolStripMenuItem.Click += new System.EventHandler(this.test3ToolStripMenuItem_Click);
             // 
