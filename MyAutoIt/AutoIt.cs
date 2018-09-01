@@ -23,6 +23,7 @@ namespace MyAutoIt
     {
         MyLogger logger;
         AutoItConfigure configure;
+        String configPath = Application.StartupPath + @"\Script";
         String testDataPath = Application.StartupPath + @"\Linage2Test";
         String dataPath = Application.StartupPath + @"\Linage2";
         //String imagePath = Application.StartupPath + @"\Linage2\Main";
@@ -35,7 +36,7 @@ namespace MyAutoIt
             logger.logStr("Start");
             try
             {
-                configure = JsonConvert.DeserializeObject<AutoItConfigure>(File.ReadAllText(dataPath + @"\AutoIt.json"));
+                configure = JsonConvert.DeserializeObject<AutoItConfigure>(File.ReadAllText(configPath + @"\AutoIt.json"));
             }catch(Exception ex)
             {
                 configure = new AutoItConfigure();
@@ -197,6 +198,9 @@ namespace MyAutoIt
         public String[] trainFolders = new string[] { };
         public String imageFilter = "*.png";
         public String imageFilterOut = "mask.png";
+        public Rectangle[] areas = new Rectangle[] {
+            new Rectangle(0,0,1280,720)
+        }; 
     }
 
     public static class ImageTrainDataExtension
