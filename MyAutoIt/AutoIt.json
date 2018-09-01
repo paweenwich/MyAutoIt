@@ -4,11 +4,18 @@
     "Main",
     "DailyQuest",
     "Move",
-    "Dead"
+	"ClearDungeon",
+    "Dead",
+	"Ads",
   ],
   "imageFilter": "*.png",
   "imageFilterOut": "mask.png",
   "areas": [
-    "0, 0, 1280, 720"
+    "10, 10, 200, 60",
+	"0, 660, 200, 50",
+	"500, 180, 250, 40",
+	"1215, 240, 46, 40",
+	"1230, 0, 40, 40",
+	"900, 70, 150, 70",
   ]
 }

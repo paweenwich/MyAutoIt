@@ -678,6 +678,15 @@ namespace MyAutoIt
             AdbExec(cmd1);
             String cmd2 = String.Format("pull /data/local/tmp/screen.png {0}",fileName);
             return AdbExec(cmd2);
+        }
+        
+        public static Bitmap CreateMaskBitmap(Size size, Rectangle[] rects)
+        {
+            Bitmap bmp = new Bitmap(size.Width,size.Height);
+            Graphics g = Graphics.FromImage(bmp);
+            g.Clear(Color.Black);
+            g.FillRectangles(new SolidBrush(Color.White), rects);
+            return bmp;
         } 
 
         public static void MouseClick(String button,int x, int y)

@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -26,6 +27,7 @@ namespace MyAutoIt
         String configPath = Application.StartupPath + @"\..\..";
         String testDataPath = Application.StartupPath + @"\Linage2Test";
         String dataPath = Application.StartupPath + @"\Linage2";
+
         //String imagePath = Application.StartupPath + @"\Linage2\Main";
 
         public AutoIt()
@@ -50,6 +52,7 @@ namespace MyAutoIt
 
         public List<ImageTrainData> GetAllTrainImageData(String folder)
         {
+            Bitmap mask = Utils.CreateMaskBitmap(new Size(1280,720),configure.areas);
             List<ImageTrainData> ret = new List<ImageTrainData>();
             for(int i = 0; i < configure.trainFolders.Length; i++)
             {
@@ -57,7 +60,9 @@ namespace MyAutoIt
                 ImageFileData[] images = GetImagesFromDir(folderName, configure.imageFilter, configure.imageFilterOut);
                 foreach(ImageFileData img in images)
                 {
+                    img.image.ApplyMask(mask);
                     ret.Add(
+                            
                             new ImageTrainData()
                             {
                                 label = configure.trainFolders[i],
@@ -94,18 +99,20 @@ namespace MyAutoIt
 
         private void test1ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
             List<ImageTrainData> trainData = GetAllTrainImageData(dataPath);
-            var bow = BagOfVisualWords.Create(numberOfWords: 10);
-            //var bow = BagOfVisualWords.Create(new BinarySplit(10));
-            
-            var images = trainData.GetBitmaps();
-            //bow.Learn(images,new double[] {1,1,1,1, 1, 1, 1, 1, 1, 1, 1, 1, 4 });
-            bow.Learn(images);
-            Accord.IO.Serializer.Save(bow, dataPath + @"\train.bow");
-            double[][] features = bow.Transform(images);
             int[] labelIndexs = trainData.GetLabelIndexs();
             String[] labels = trainData.GetLabels();
+            var bow = BagOfVisualWords.Create(numberOfWords: 10);
+            //bow.Detector.Threshold = 0.0001;
+            //var bow = BagOfVisualWords.Create(new BinarySplit(10));
+
+            var images = trainData.GetBitmaps();
+            bow.Learn(images);
+
+            double[][] features = bow.Transform(images);
+            //bow.Learn(images,new double[] {1,1,1,1, 1, 1, 1, 1, 1, 1, 1, 1, 4 });
+            Accord.IO.Serializer.Save(bow, dataPath + @"\train.bow");
+            
             /*var teacher = new SequentialMinimalOptimization<Gaussian>()
             {
                 //Complexity = 100 // make a hard margin SVM
@@ -149,10 +156,14 @@ namespace MyAutoIt
 
         private void test3ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach(var a in GetAllTrainImageData(dataPath))
-            {
-                logger.logStr(a.ToString());
-            }
+            Bitmap myImage = (Bitmap)Bitmap.FromFile(dataPath + @"\main\4yjfo4fa53b.png");
+            Bitmap bmp = Utils.CreateMaskBitmap(myImage.Size, new Rectangle[] { new Rectangle(10, 10, 100, 100) });
+            myImage.ApplyMask(bmp);
+            //Graphics gx = Graphics.FromImage(myImage);
+            //ImageAttributes imageAttr = new ImageAttributes();
+            //imageAttr.SetColorKey(Color.White, Color.White, ColorAdjustType.Default);
+            //gx.DrawImage(bmp, new Rectangle(0, 0, myImage.Width, myImage.Height), 0, 0, myImage.Width, myImage.Height, GraphicsUnit.Pixel, imageAttr);
+            myImage.Save("test.png");
         }
 
         public void TestData(dynamic bow, MulticlassSupportVectorMachine<Linear> machine, List<ImageTrainData> trainData)
@@ -209,6 +220,15 @@ namespace MyAutoIt
 
     public static class ImageTrainDataExtension
     {
+        // White is color key
+        public static void ApplyMask(this Bitmap _self, Bitmap mask)
+        {
+            Graphics gx = Graphics.FromImage(_self);
+            ImageAttributes imageAttr = new ImageAttributes();
+            imageAttr.SetColorKey(Color.White, Color.White, ColorAdjustType.Default);
+            gx.DrawImage(mask, new Rectangle(0, 0, _self.Width, _self.Height), 0, 0, mask.Width, mask.Height, GraphicsUnit.Pixel, imageAttr);
+        }
+
         public static Bitmap[] GetBitmaps(this ImageFileData[] _self)
         {
             List<Bitmap> ret = new List<Bitmap>();
