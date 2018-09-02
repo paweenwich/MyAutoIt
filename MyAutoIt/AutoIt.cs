@@ -169,37 +169,56 @@ namespace MyAutoIt
             int[] labelIndexs = trainData.GetLabelIndexs();
             String[] labels = trainData.GetLabels();
             var images = trainData.GetBitmaps();
-            var bow = Accord.IO.Serializer.Load<BagOfVisualWords>(dataPath + @"\train.bow");
+            var bow = Accord.IO.Serializer.Load<BagOfVisualWords>(dataPath + @"\train-100.bow");
             double[][] features = bow.Transform(images);
             int numOutput = trainData.GetNumOutput();
 
 
             var function = new SigmoidFunction();
-            var network = new ActivationNetwork(function, 10, 5,numOutput);
+            var network = new ActivationNetwork(function, bow.NumberOfOutputs,20,numOutput);
             new NguyenWidrow(network).Randomize();
+
 
             
             // Teach the network using parallel Rprop:
             var teacher = new ParallelResilientBackpropagationLearning(network);
+            //var teacher = new BackPropagationLearning(network);
+
 
             //creat output
             double[][] outputs = trainData.GetOutputs(numOutput);
-            double error = 1.0;
-            while (error > 1e-5)
+            double avgError = 10000.0;
+            double prevError = avgError;
+            while (avgError > 1e-5)
             {
-                error = teacher.RunEpoch(features, outputs);
-                logger.logStr(String.Format("{0}",error));
+                double[] errors = new double[10];
+                for (int i = 0; i < 10; i++)
+                {
+                    errors[i] = teacher.RunEpoch(features, outputs);
+                }
+                avgError = errors.Average();
+                if (prevError > avgError)
+                {
+                    logger.logStr(String.Format("{0} {1}", avgError, prevError));
+                    prevError = avgError;
+                }
+                else
+                {
+                    logger.logStr(String.Format("{0}", avgError));
+                    break;
+                    
+                }
                 Application.DoEvents();
                 //int errCount = TestNetwork(bow, network, trainData,true);
                 //if(errCount == 0)
                 //{
-                    int testErrorCount = TestNetwork(bow, network, testDataSet,true);
-                    logger.logStr(String.Format("{0}", testErrorCount));
+                    //int testErrorCount = TestNetwork(bow, network, testDataSet,true);
+                    //logger.logStr(String.Format("{0}", testErrorCount));
                 //}
             }
             logger.logStr("Done");
             Accord.IO.Serializer.Save(network, dataPath + @"\train.net");
-            //TestNetwork(bow, network, trainData);
+            TestNetwork(bow, network, trainData);
             TestNetwork(bow, network, testDataSet);
         }
 
@@ -253,6 +272,21 @@ namespace MyAutoIt
             }
             double error = new ZeroOneLoss(labelIndexs).Loss(prediction);
             logger.logStr("" + error);
+        }
+
+        private void bowsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            List<ImageTrainData> trainData = GetAllTrainImageData(dataPath);
+            //int[] labelIndexs = trainData.GetLabelIndexs();
+            //String[] labels = trainData.GetLabels();
+            for (int i = 10; i <= 100; i += 5)
+            {
+                var bow = BagOfVisualWords.Create(numberOfWords: i);
+                var images = trainData.GetBitmaps();
+                bow.Learn(images);
+                Accord.IO.Serializer.Save(bow, dataPath + String.Format(@"\train-{0}.bow",i));
+                logger.logStr("Done " + i );
+            }
         }
     }
 
