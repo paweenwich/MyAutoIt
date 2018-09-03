@@ -198,7 +198,7 @@ namespace MyAutoIt
             }
             int testErrCount = TestNetwork(mainBow, mainNetwork, testData);
             int trainErrCount = TestNetwork(mainBow, mainNetwork, trainData);
-            logger.logStr(String.Format("{0} {1}", trainErrCount, testErrCount));
+            logger.logStr(String.Format("train {0} test {1}", trainErrCount, testErrCount));
         }
 
         private void testCaptureToolStripMenuItem_Click_1(object sender, EventArgs e)
@@ -281,13 +281,16 @@ namespace MyAutoIt
             var teacher = new ParallelResilientBackpropagationLearning(network);
             //var teacher = new BackPropagationLearning(network);
 
-
+            
             //creat output
             double[][] outputs = trainData.GetOutputs(numOutput);
             double avgError = 10000.0;
             double prevError = avgError;
-            while (avgError > 1e-5)
+            double bestError = avgError;
+            int errorCount = 0;
+            while ((errorCount < 10) && (avgError > 0.00001))
             {
+                Application.DoEvents();
                 double[] errors = new double[10];
                 for (int i = 0; i < 10; i++)
                 {
@@ -296,14 +299,25 @@ namespace MyAutoIt
                 avgError = errors.Average();
                 if (prevError > avgError)
                 {
-                    logger.logStr(String.Format("{0} {1}", avgError, prevError));
+                    logger.logStr(String.Format("{0} {1} #{2}", avgError, prevError, errorCount));
                     prevError = avgError;
+                    //save best error
+                    if (bestError > avgError)
+                    {
+                        bestError = avgError;
+                        Accord.IO.Serializer.Save(network, dataPath + String.Format(@"\train-{0}.net", bow.NumberOfOutputs));
+                    }
+                    //Accord.IO.Serializer.Save(teacher, dataPath + String.Format(@"\train-{0}.teacher", bow.NumberOfOutputs));
                 }
                 else
                 {
                     logger.logStr(String.Format("{0}", avgError));
-                    break;
-
+                    //network = Accord.IO.Serializer.Load<ActivationNetwork>(dataPath + String.Format(@"\train-{0}.net", bow.NumberOfOutputs));
+                    //teacher = Accord.IO.Serializer.Load<ParallelResilientBackpropagationLearning>(dataPath + String.Format(@"\train-{0}.teacher", bow.NumberOfOutputs));
+                    prevError = 10000.0;
+                    //teacher.
+                    //break;
+                    errorCount++;
                 }
                 Application.DoEvents();
                 //int errCount = TestNetwork(bow, network, trainData,true);
@@ -313,8 +327,8 @@ namespace MyAutoIt
                 //logger.logStr(String.Format("{0}", testErrorCount));
                 //}
             }
-            logger.logStr("Done");
-            Accord.IO.Serializer.Save(network, dataPath + String.Format(@"\train-{0}.net", bow.NumberOfOutputs));
+            logger.logStr("Done " + bestError);
+            //Accord.IO.Serializer.Save(network, dataPath + String.Format(@"\train-{0}.net", bow.NumberOfOutputs));
             //TestNetwork(bow, network, trainData);
             //TestNetwork(bow, network, testData);
 
