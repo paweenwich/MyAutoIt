@@ -24,6 +24,16 @@ namespace MyAutoIt
         {
             if (richTextBox != null)
             {
+                /*if (richTextBox.InvokeRequired)
+                {
+                    StringArgReturningVoidDelegate d = new StringArgReturningVoidDelegate(SetText);
+                    this.Invoke(d, new object[] { text });
+                }
+                else
+                {
+                    this.textBox1.Text = text;
+                }*/
+
                 richTextBox.AppendText(str + "\n");
                 return;
             }

@@ -9,6 +9,7 @@ using System.Threading;
 using System.Drawing.Imaging;
 using System.Security.Principal;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace MyAutoIt
 {
@@ -1119,6 +1120,18 @@ namespace MyAutoIt
         {
             RawSerializer<int> rs2 = new RawSerializer<int>();
             return rs2.RawDeserialize(data);
+        }
+
+        public static String ToJsonString(object obj,bool indent = false)
+        {
+            if (indent)
+            {
+                return JsonConvert.SerializeObject(obj,Formatting.Indented);
+            }
+            else
+            {
+                return JsonConvert.SerializeObject(obj);
+            }
         }
         public class MyRawBitmapData
         {

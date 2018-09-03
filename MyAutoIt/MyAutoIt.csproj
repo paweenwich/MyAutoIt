@@ -199,6 +199,7 @@
     <Compile Include="FormOpenCV.Designer.cs">
       <DependentUpon>FormOpenCV.cs</DependentUpon>
     </Compile>
+    <Compile Include="ImageTrainData.cs" />
     <Compile Include="Linage2.cs">
       <SubType>Form</SubType>
     </Compile>
