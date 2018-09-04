@@ -53,6 +53,10 @@ function ProcessTask()
 end;
 
 function Auto()
+    bot:log("Auto");
+end;
+
+function AutoOLD()
 
 	-- bot:log(classifyResult:ToString());
 	screenName = classifyResult.label;

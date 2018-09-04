@@ -38,10 +38,13 @@
             this.trainToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.testWithTestSetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testCaptureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.autoCaptureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reloadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.botToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.autoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.test1ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,8 +52,11 @@
             this.test3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmbFolder = new System.Windows.Forms.ComboBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.testWithTestSetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.timer2 = new System.Windows.Forms.Timer(this.components);
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.txtInput = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtDebug
@@ -59,7 +65,7 @@
             this.txtDebug.Font = new System.Drawing.Font("Courier New", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtDebug.Location = new System.Drawing.Point(0, 28);
             this.txtDebug.Name = "txtDebug";
-            this.txtDebug.Size = new System.Drawing.Size(1084, 451);
+            this.txtDebug.Size = new System.Drawing.Size(1084, 417);
             this.txtDebug.TabIndex = 9;
             this.txtDebug.Text = "";
             // 
@@ -70,6 +76,7 @@
             this.dataToolStripMenuItem,
             this.networkToolStripMenuItem,
             this.scriptToolStripMenuItem,
+            this.botToolStripMenuItem,
             this.toolsToolStripMenuItem,
             this.debugToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -135,6 +142,13 @@
             this.testToolStripMenuItem.Text = "Test";
             this.testToolStripMenuItem.Click += new System.EventHandler(this.testToolStripMenuItem_Click_1);
             // 
+            // testWithTestSetToolStripMenuItem
+            // 
+            this.testWithTestSetToolStripMenuItem.Name = "testWithTestSetToolStripMenuItem";
+            this.testWithTestSetToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            this.testWithTestSetToolStripMenuItem.Text = "Test with Test Set";
+            this.testWithTestSetToolStripMenuItem.Click += new System.EventHandler(this.testWithTestSetToolStripMenuItem_Click);
+            // 
             // testCaptureToolStripMenuItem
             // 
             this.testCaptureToolStripMenuItem.Name = "testCaptureToolStripMenuItem";
@@ -164,6 +178,22 @@
             this.reloadToolStripMenuItem.Size = new System.Drawing.Size(131, 26);
             this.reloadToolStripMenuItem.Text = "Reload";
             this.reloadToolStripMenuItem.Click += new System.EventHandler(this.reloadToolStripMenuItem_Click);
+            // 
+            // botToolStripMenuItem
+            // 
+            this.botToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.autoToolStripMenuItem});
+            this.botToolStripMenuItem.Name = "botToolStripMenuItem";
+            this.botToolStripMenuItem.Size = new System.Drawing.Size(44, 24);
+            this.botToolStripMenuItem.Text = "Bot";
+            // 
+            // autoToolStripMenuItem
+            // 
+            this.autoToolStripMenuItem.CheckOnClick = true;
+            this.autoToolStripMenuItem.Name = "autoToolStripMenuItem";
+            this.autoToolStripMenuItem.Size = new System.Drawing.Size(116, 26);
+            this.autoToolStripMenuItem.Text = "Auto";
+            this.autoToolStripMenuItem.Click += new System.EventHandler(this.autoToolStripMenuItem_Click);
             // 
             // toolsToolStripMenuItem
             // 
@@ -218,26 +248,44 @@
             this.timer1.Interval = 3000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // testWithTestSetToolStripMenuItem
+            // timer2
             // 
-            this.testWithTestSetToolStripMenuItem.Name = "testWithTestSetToolStripMenuItem";
-            this.testWithTestSetToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
-            this.testWithTestSetToolStripMenuItem.Text = "Test with Test Set";
-            this.testWithTestSetToolStripMenuItem.Click += new System.EventHandler(this.testWithTestSetToolStripMenuItem_Click);
+            this.timer2.Interval = 3000;
+            this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.txtInput);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel1.Location = new System.Drawing.Point(0, 445);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(1084, 34);
+            this.panel1.TabIndex = 12;
+            // 
+            // txtInput
+            // 
+            this.txtInput.Location = new System.Drawing.Point(12, 6);
+            this.txtInput.Name = "txtInput";
+            this.txtInput.Size = new System.Drawing.Size(211, 22);
+            this.txtInput.TabIndex = 0;
+            this.txtInput.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
             // 
             // AutoIt
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1084, 479);
-            this.Controls.Add(this.cmbFolder);
             this.Controls.Add(this.txtDebug);
+            this.Controls.Add(this.cmbFolder);
             this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.panel1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "AutoIt";
             this.Text = "AutoIt";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -266,5 +314,10 @@
         private System.Windows.Forms.ToolStripMenuItem scriptToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reloadToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem testWithTestSetToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem botToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem autoToolStripMenuItem;
+        private System.Windows.Forms.Timer timer2;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.TextBox txtInput;
     }
 }

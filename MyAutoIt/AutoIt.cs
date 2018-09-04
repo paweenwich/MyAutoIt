@@ -31,7 +31,67 @@ namespace MyAutoIt
         void log(String data);
         void ClickAt(int x,int y);
         void AddTask(String cmd,int time);
+        String CaptureScreen();
     }
+
+    public interface ImageClassifier
+    {
+        int Evaluate(ImageTrainDataSet trainData);
+        String Classify(String fileName, String[] map);
+    }
+
+    public class BowImageClassifier : ImageClassifier
+    {
+        public dynamic bow;
+        public dynamic network;
+        public Bitmap mask;
+        public void Init(String bowFile,String networkFile, Bitmap mask)
+        {
+            bow = Accord.IO.Serializer.Load<BagOfVisualWords>(bowFile);
+            network = Accord.IO.Serializer.Load<ActivationNetwork>(networkFile);
+            this.mask = mask;
+        }
+        public int Evaluate(ImageTrainDataSet trainData)
+        {
+            double[][] features = trainData.GetFeature(bow, mask);
+            int[] labelIndexs = trainData.GetLabelIndexs();
+            String[] labels = trainData.GetLabels();
+            int errorCount = 0;
+            for (int i = 0; i < trainData.Count(); i++)
+            {
+                //double[] feature = bow.Transform(images[i]);
+                double[] answer = network.Compute(features[i]);
+
+                int expected = labelIndexs[i];
+                int actual; answer.Max(out actual);
+                if (actual != expected)
+                { 
+                    errorCount++;
+                }
+            }
+            return errorCount;
+
+        }
+
+        public String Classify(String fileName, String[] map)
+        {
+            Bitmap bmp = (Bitmap)Bitmap.FromFile(fileName);
+            bmp.ApplyMask(mask);
+            double[] features = bow.Transform(bmp);
+            double[] answer = network.Compute(features);
+            int actual;
+            answer.Max(out actual);
+            //logger.logStr("classifyImage " + map[actual] + " " + actual);
+            bmp.Dispose();
+            return map[actual];
+        }
+
+        public byte[] ComputeHash(ImageTrainDataSet trainData)
+        {
+            return trainData.MD5Feature(bow, mask);
+        }
+    }
+
 
     public partial class AutoIt : Form, IAutoBot
     {
@@ -45,8 +105,9 @@ namespace MyAutoIt
         ImageTrainDataSet trainData;
         ImageTrainDataSet testData;
         //String imagePath = Application.StartupPath + @"\Linage2\Main";
-        dynamic mainBow;
-        dynamic mainNetwork;
+        BowImageClassifier imgClassifier;
+        //dynamic mainBow;
+        //dynamic mainNetwork;
         int bowSize = 100;
         Bitmap mask;
         public Lua lua;
@@ -178,20 +239,29 @@ namespace MyAutoIt
             //throw new NotImplementedException();
         }
 
+        public String CaptureScreen()
+        {
+            String fileName = dataPath + @"\tmp\" + Path.GetRandomFileName().Replace(".", "") + ".png";
+            Utils.AdbCpatureToFile(fileName);
+            return fileName;
+        }
+
         public void TestAndCapture(String expectAnswer = "")
         {
-            String fileName2 = dataPath + @"\tmp\" + Path.GetRandomFileName().Replace(".", "") + ".png";
-            Utils.AdbCpatureToFile(fileName2);
+            String fileName2 = CaptureScreen();
             logger.logStr("Capture " + fileName2);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             String ret = classifyImage(fileName2, configure.trainFolders);
+            logger.logStr("[" + ret + "]");
             stopwatch.Stop();
             long elapsed_time = stopwatch.ElapsedMilliseconds;
             logger.logStr(String.Format("{0:0.00}", elapsed_time / 1000.0));
             if ((ret != expectAnswer) && (expectAnswer != ""))
             {
-                String saveFile = dataPath + @"\tmp\error\" + Path.GetRandomFileName().Replace(".", "") + ".png";
+                //String saveFile = dataPath + @"\tmp\error\" + Path.GetRandomFileName().Replace(".", "") + ".png";
+                //testDataPath
+                String saveFile = testDataPath + @"\" + expectAnswer + @"\" + Path.GetRandomFileName().Replace(".", "") + ".png";
                 File.Copy(fileName2, saveFile);
                 logger.logError("Save " + saveFile);
             }else
@@ -216,19 +286,23 @@ namespace MyAutoIt
 
         private void loadToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            mainBow = Accord.IO.Serializer.Load<BagOfVisualWords>(dataPath + String.Format(@"\train-{0}.bow", bowSize));
-            mainNetwork = Accord.IO.Serializer.Load<ActivationNetwork>(dataPath + String.Format(@"\train-{0}.net", mainBow.NumberOfOutputs));
+            imgClassifier = new BowImageClassifier();
+            imgClassifier.Init(
+                dataPath + String.Format(@"\train-{0}.bow", bowSize),
+                dataPath + String.Format(@"\train-{0}.net", bowSize),
+                mask
+            );
             logger.logStr("Loaded");
         }
 
         private void testToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            if(mainBow == null)
+            if(imgClassifier == null)
             {
                 loadToolStripMenuItem_Click(sender,e);
             }
-            int testErrCount = TestNetwork(mainBow, mainNetwork, testData);
-            int trainErrCount = TestNetwork(mainBow, mainNetwork, trainData);
+            int testErrCount = imgClassifier.Evaluate(testData);
+            int trainErrCount = imgClassifier.Evaluate(trainData);
             logger.logStr(String.Format("train {0} test {1}", trainErrCount, testErrCount));
         }
 
@@ -262,6 +336,7 @@ namespace MyAutoIt
         private void trainToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
             ImageTrainDataSet testDataSet = GetAllTrainImageData(testDataPath);
+            testDataSet.flgCache = true;
 
             int[] labelIndexs = trainData.GetLabelIndexs();
             String[] labels = trainData.GetLabels();
@@ -294,9 +369,9 @@ namespace MyAutoIt
                     avgError = errors.Average();
                     if (prevError > avgError)
                     {
-                        int trainError = TestNetwork(bow, network, trainData, true);
-                        int testError = TestNetwork(bow, network, testData, true);
-                        int testSetError = TestNetwork(bow, network, testDataSet, true);
+                        int trainError = imgClassifier.Evaluate(trainData);
+                        int testError = imgClassifier.Evaluate(testData);
+                        int testSetError = imgClassifier.Evaluate(testDataSet);
                         logger.logStr(String.Format("{0} {1} {2} {3} {4} #{5}", avgError, prevError, trainError,testError, testSetError, errorCount));
                         prevError = avgError;
                         //save best error
@@ -323,10 +398,10 @@ namespace MyAutoIt
                 logger.logStr("Done " + bestError);
             }
         }
-
-        public int TestNetwork(dynamic bow, dynamic network, ImageTrainDataSet trainData, bool flgSilence = false)
+        /*
+        public int TestNetwork(ImageClassifier imgClassifier, ImageTrainDataSet trainData, bool flgSilence = false)
         {
-            double[][] features = trainData.GetFeature(bow, mask);
+            double[][] features = trainData.GetFeature(imgClassifier.bow, mask);
             int[] labelIndexs = trainData.GetLabelIndexs();
             String[] labels = trainData.GetLabels();
             int errorCount = 0;
@@ -348,24 +423,17 @@ namespace MyAutoIt
                 }
             }
             return errorCount;
-        }
+        }*/
 
         public String classifyImage(String fileName, String[] map)
         {
-            Bitmap bmp = (Bitmap)Bitmap.FromFile(fileName);
-            bmp.ApplyMask(mask);
-            double[] features = mainBow.Transform(bmp);
-            double[] answer = mainNetwork.Compute(features);
-            int actual;
-            answer.Max(out actual);
-            logger.logStr("classifyImage "+ map[actual] + " " + actual);
-            bmp.Dispose();
-            return map[actual];
+            return imgClassifier.Classify(fileName, map);
         }
 
         private void autoCaptureToolStripMenuItem_Click(object sender, EventArgs e)
         {
             timer1.Enabled = autoCaptureToolStripMenuItem.Checked;
+            cmbFolder.Enabled = (!timer1.Enabled);
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -380,20 +448,43 @@ namespace MyAutoIt
         private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
         {
             LoadScript();
-            new Thread(() =>
-            {
-                logger.logStr("I'm running on another thread!");
-            }).Start();
         }
 
         private void testWithTestSetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ImageTrainDataSet testDataSet = GetAllTrainImageData(testDataPath);
-            byte[] hash = testDataSet.MD5Feature(mainBow,mask);
+            testDataSet.flgCache = true;
+            byte[] hash = imgClassifier.ComputeHash(testDataSet);
             logger.logStr(hash.ToHex());
-            int testErrCount = TestNetwork(mainBow, mainNetwork, testDataSet);
+            int testErrCount = imgClassifier.Evaluate(testDataSet);
             logger.logStr(String.Format("test {0}", testErrCount));
 
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            new Thread(() =>
+            {
+                ExecScript("if Auto ~= nil then Auto() end");
+            }).Start();
+        }
+
+        private void autoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            timer2.Enabled = autoToolStripMenuItem.Enabled;
+        }
+
+        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if(e.KeyChar == (char)13)
+            {
+                String cmd = txtInput.Text;
+                logger.logStr(">> [" + txtInput.Text + "]");
+                new Thread(() =>
+                {
+                    ExecScript(cmd);
+                }).Start();
+            }
         }
     }
 

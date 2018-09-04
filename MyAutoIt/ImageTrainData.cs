@@ -40,6 +40,7 @@ namespace MyAutoIt
     public class ImageTrainDataSet : List<ImageTrainData>
     {
         private double[][] features;
+        public bool flgCache = false;
 
         public byte[] MD5Feature(dynamic bow, Bitmap mask)
         {
@@ -79,9 +80,12 @@ namespace MyAutoIt
                 {
                     Bitmap[] images = GetBitmaps(mask);
                     features = bow.Transform(images);
-                    String data = Utils.ToJsonString(features);
-                    File.WriteAllText(fileName,data);
-                    Console.WriteLine("ImageTrainDataSet cahce feature " + fileName);
+                    if (flgCache)
+                    {
+                        String data = Utils.ToJsonString(features);
+                        File.WriteAllText(fileName, data);
+                        Console.WriteLine("ImageTrainDataSet cahce feature " + fileName);
+                    }
                 }
             }
             return features;
