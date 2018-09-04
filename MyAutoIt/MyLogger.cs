@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -24,17 +25,18 @@ namespace MyAutoIt
         {
             if (richTextBox != null)
             {
-                /*if (richTextBox.InvokeRequired)
+                if (richTextBox.InvokeRequired)
                 {
-                    StringArgReturningVoidDelegate d = new StringArgReturningVoidDelegate(SetText);
-                    this.Invoke(d, new object[] { text });
+                    //Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
+                    richTextBox.Invoke((MethodInvoker)delegate {
+                        //Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
+                        richTextBox.AppendText(str + "\n");
+                    });
                 }
                 else
                 {
-                    this.textBox1.Text = text;
-                }*/
-
-                richTextBox.AppendText(str + "\n");
+                    richTextBox.AppendText(str + "\n");
+                }
                 return;
             }
             Console.WriteLine(str);
@@ -44,7 +46,16 @@ namespace MyAutoIt
         {
             if (richTextBox != null)
             {
-                richTextBox.AppendText(Color.Red,str + "\n");
+                if (richTextBox.InvokeRequired)
+                {
+                    richTextBox.Invoke((MethodInvoker)delegate {
+                        richTextBox.AppendText(Color.Red, str + "\n");
+                    });
+                }
+                else
+                {
+                    richTextBox.AppendText(Color.Red, str + "\n");
+                }
                 return;
             }
             Console.WriteLine("ERROR: " + str);

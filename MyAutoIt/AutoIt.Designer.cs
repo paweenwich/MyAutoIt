@@ -40,6 +40,8 @@
             this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testCaptureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.autoCaptureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.scriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reloadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.test1ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,6 +49,7 @@
             this.test3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmbFolder = new System.Windows.Forms.ComboBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.testWithTestSetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -66,6 +69,7 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.dataToolStripMenuItem,
             this.networkToolStripMenuItem,
+            this.scriptToolStripMenuItem,
             this.toolsToolStripMenuItem,
             this.debugToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -103,6 +107,7 @@
             this.trainToolStripMenuItem,
             this.loadToolStripMenuItem,
             this.testToolStripMenuItem,
+            this.testWithTestSetToolStripMenuItem,
             this.testCaptureToolStripMenuItem,
             this.autoCaptureToolStripMenuItem});
             this.networkToolStripMenuItem.Name = "networkToolStripMenuItem";
@@ -112,28 +117,28 @@
             // trainToolStripMenuItem
             // 
             this.trainToolStripMenuItem.Name = "trainToolStripMenuItem";
-            this.trainToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.trainToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.trainToolStripMenuItem.Text = "Train";
             this.trainToolStripMenuItem.Click += new System.EventHandler(this.trainToolStripMenuItem_Click_1);
             // 
             // loadToolStripMenuItem
             // 
             this.loadToolStripMenuItem.Name = "loadToolStripMenuItem";
-            this.loadToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.loadToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.loadToolStripMenuItem.Text = "Load";
             this.loadToolStripMenuItem.Click += new System.EventHandler(this.loadToolStripMenuItem_Click);
             // 
             // testToolStripMenuItem
             // 
             this.testToolStripMenuItem.Name = "testToolStripMenuItem";
-            this.testToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.testToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.testToolStripMenuItem.Text = "Test";
             this.testToolStripMenuItem.Click += new System.EventHandler(this.testToolStripMenuItem_Click_1);
             // 
             // testCaptureToolStripMenuItem
             // 
             this.testCaptureToolStripMenuItem.Name = "testCaptureToolStripMenuItem";
-            this.testCaptureToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.testCaptureToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.testCaptureToolStripMenuItem.Text = "Test (Capture)";
             this.testCaptureToolStripMenuItem.Click += new System.EventHandler(this.testCaptureToolStripMenuItem_Click_1);
             // 
@@ -141,15 +146,31 @@
             // 
             this.autoCaptureToolStripMenuItem.CheckOnClick = true;
             this.autoCaptureToolStripMenuItem.Name = "autoCaptureToolStripMenuItem";
-            this.autoCaptureToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.autoCaptureToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.autoCaptureToolStripMenuItem.Text = "Auto Capture";
             this.autoCaptureToolStripMenuItem.Click += new System.EventHandler(this.autoCaptureToolStripMenuItem_Click);
+            // 
+            // scriptToolStripMenuItem
+            // 
+            this.scriptToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.reloadToolStripMenuItem});
+            this.scriptToolStripMenuItem.Name = "scriptToolStripMenuItem";
+            this.scriptToolStripMenuItem.Size = new System.Drawing.Size(59, 24);
+            this.scriptToolStripMenuItem.Text = "Script";
+            // 
+            // reloadToolStripMenuItem
+            // 
+            this.reloadToolStripMenuItem.Name = "reloadToolStripMenuItem";
+            this.reloadToolStripMenuItem.Size = new System.Drawing.Size(131, 26);
+            this.reloadToolStripMenuItem.Text = "Reload";
+            this.reloadToolStripMenuItem.Click += new System.EventHandler(this.reloadToolStripMenuItem_Click);
             // 
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(57, 24);
             this.toolsToolStripMenuItem.Text = "Tools";
+            this.toolsToolStripMenuItem.Visible = false;
             // 
             // debugToolStripMenuItem
             // 
@@ -190,11 +211,19 @@
             this.cmbFolder.Name = "cmbFolder";
             this.cmbFolder.Size = new System.Drawing.Size(121, 24);
             this.cmbFolder.TabIndex = 11;
+            this.cmbFolder.TabStop = false;
             // 
             // timer1
             // 
             this.timer1.Interval = 3000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // testWithTestSetToolStripMenuItem
+            // 
+            this.testWithTestSetToolStripMenuItem.Name = "testWithTestSetToolStripMenuItem";
+            this.testWithTestSetToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            this.testWithTestSetToolStripMenuItem.Text = "Test with Test Set";
+            this.testWithTestSetToolStripMenuItem.Click += new System.EventHandler(this.testWithTestSetToolStripMenuItem_Click);
             // 
             // AutoIt
             // 
@@ -234,5 +263,8 @@
         private System.Windows.Forms.ComboBox cmbFolder;
         private System.Windows.Forms.ToolStripMenuItem autoCaptureToolStripMenuItem;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.ToolStripMenuItem scriptToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reloadToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem testWithTestSetToolStripMenuItem;
     }
 }

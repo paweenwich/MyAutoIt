@@ -1,10 +1,13 @@
 ﻿using Accord;
 using Accord.Imaging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,7 +16,7 @@ namespace MyAutoIt
     public class ImageFileData
     {
         public String fileName;
-        public Bitmap image;
+        //public Bitmap image;
     }
     public class ImageTrainData : ImageFileData
     {
@@ -29,75 +32,99 @@ namespace MyAutoIt
             ret.label = label;
             ret.labelIndex = labelIndex;
             ret.fileName = fileName;
-            ret.image = (Bitmap)image.Clone();
+            //ret.image = (Bitmap)image.Clone();
             return ret;
         }
     }
 
-    public class TrainDataInfo
+    public class ImageTrainDataSet : List<ImageTrainData>
     {
-        public int index;
-        public String label;
-        public int count;
-    }
+        private double[][] features;
 
-    public static class ImageTrainDataExtension
-    {
-        // White is color key
-        public static void ApplyMask(this Bitmap _self, Bitmap mask)
+        public byte[] MD5Feature(dynamic bow, Bitmap mask)
         {
-            Graphics gx = Graphics.FromImage(_self);
-            ImageAttributes imageAttr = new ImageAttributes();
-            imageAttr.SetColorKey(Color.White, Color.White, ColorAdjustType.Default);
-            gx.DrawImage(mask, new Rectangle(0, 0, _self.Width, _self.Height), 0, 0, mask.Width, mask.Height, GraphicsUnit.Pixel, imageAttr);
+            HashAlgorithm hasher = new MD5CryptoServiceProvider();
+            hasher.Initialize();
+            byte[] maskData = mask.ToBytes();
+            hasher.TransformBlock(maskData, 0, maskData.Length, null, 0);
+            foreach (var a in this)
+            {
+                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(a.fileName);
+                hasher.TransformBlock(bytes, 0, bytes.Length, null, 0);
+            }
+            byte[] bData = Accord.IO.Serializer.Save(bow);
+            hasher.TransformBlock(bData, 0, bData.Length, null, 0);
+            hasher.TransformFinalBlock(new byte[0], 0, 0);
+            byte[] hash = hasher.Hash;
+            return hash;
         }
 
-        public static Bitmap[] GetBitmaps(this ImageFileData[] _self)
+        public double[][] GetFeature(dynamic bow, Bitmap mask)
+        {
+            if (features == null)
+            {
+                //check if we have this feature in cache
+                byte[] hash = MD5Feature(bow,mask);
+                String fileName = hash.ToHex() + ".feature";
+                
+                //RawSerializer<double[][]> s = new RawSerializer<double[][]>();
+                if (File.Exists(fileName))
+                {
+                    
+                    String data = File.ReadAllText(fileName);
+                    features = JsonConvert.DeserializeObject<double[][]>(data);
+                    Console.WriteLine("ImageTrainDataSet load feature from cache " + fileName);
+                }
+                else
+                {
+                    Bitmap[] images = GetBitmaps(mask);
+                    features = bow.Transform(images);
+                    String data = Utils.ToJsonString(features);
+                    File.WriteAllText(fileName,data);
+                    Console.WriteLine("ImageTrainDataSet cahce feature " + fileName);
+                }
+            }
+            return features;
+        }
+        public Bitmap[] GetBitmaps(Bitmap mask)
         {
             List<Bitmap> ret = new List<Bitmap>();
-            foreach (var a in _self)
+            foreach (var a in this)
             {
-                ret.Add(a.image);
+                Bitmap bmp = (Bitmap)Bitmap.FromFile(a.fileName);
+                bmp.ApplyMask(mask);
+                ret.Add(bmp);
             }
             return ret.ToArray();
         }
-        public static Bitmap[] GetBitmaps(this List<ImageTrainData> _self)
-        {
-            List<Bitmap> ret = new List<Bitmap>();
-            foreach (var a in _self)
-            {
-                ret.Add(a.image);
-            }
-            return ret.ToArray();
-        }
-        public static int[] GetLabelIndexs(this List<ImageTrainData> _self)
+        public int[] GetLabelIndexs()
         {
             List<int> ret = new List<int>();
-            foreach (var a in _self)
+            foreach (var a in this)
             {
                 ret.Add(a.labelIndex);
             }
             return ret.ToArray();
         }
-        public static String[] GetLabels(this List<ImageTrainData> _self)
+        public String[] GetLabels()
         {
             List<String> ret = new List<String>();
-            foreach (var a in _self)
+            foreach (var a in this)
             {
                 ret.Add(a.label);
             }
             return ret.ToArray();
         }
-        public static int GetNumOutput(this List<ImageTrainData> _self)
+        public int GetNumOutput()
         {
-            var item = _self.Max(x => x.labelIndex);
+            var item = this.Max(x => x.labelIndex);
             return item + 1;
         }
-        public static double[][] GetOutputs(this List<ImageTrainData> _self, int numOutput)
+        public double[][] GetOutputs(int numOutput)
         {
-            int[] labelIndexs = _self.GetLabelIndexs();
-            double[][] outputs = new double[_self.Count][];
-            for (int i = 0; i < _self.Count; i++)
+            int[] labelIndexs = this.GetLabelIndexs();
+            double[][] outputs = new double[this.Count][];
+            for (int i = 0; i < this.Count; i++)
             {
                 outputs[i] = new double[numOutput];
                 for (int j = 0; j < numOutput; j++)
@@ -111,37 +138,38 @@ namespace MyAutoIt
             }
             return outputs;
         }
-        public static TrainDataInfo[] GetInfo(this List<ImageTrainData> _self, int numOutput)
+        public TrainDataInfo[] GetInfo(int numOutput)
         {
             TrainDataInfo[] ret = new TrainDataInfo[numOutput];
-            for(int i=0;i< numOutput; i++)
+            for (int i = 0; i < numOutput; i++)
             {
                 ret[i] = new TrainDataInfo() { index = i, count = 0, label = "" };
             }
-            for (int i = 0; i < _self.Count; i++)
+            for (int i = 0; i < this.Count; i++)
             {
-                ret[_self[i].labelIndex].count++;
-                ret[_self[i].labelIndex].label = _self[i].label;
+                ret[this[i].labelIndex].count++;
+                ret[this[i].labelIndex].label = this[i].label;
             }
             return ret;
         }
-        public static List<ImageTrainData> BalanceData(this List<ImageTrainData> _self)
+        public ImageTrainDataSet BalanceData()
         {
             Random rand = new Random();
-            List<ImageTrainData> ret = new List<ImageTrainData>(_self);
-            TrainDataInfo[] infos = _self.GetInfo(_self.GetNumOutput());
+            ImageTrainDataSet ret = new ImageTrainDataSet();
+            ret.AddRange(this);
+            TrainDataInfo[] infos = this.GetInfo(this.GetNumOutput());
             int maxCount = infos.Max(x => x.count);
-            for(int i = 0; i < infos.Length; i++)
+            for (int i = 0; i < infos.Length; i++)
             {
                 for (int j = infos[i].count; j < maxCount; j++)
                 {
                     //Random _self for that index
                     while (true)
                     {
-                        int index = rand.Next(_self.Count);
-                        if (_self[index].labelIndex == i)
+                        int index = rand.Next(this.Count);
+                        if (this[index].labelIndex == i)
                         {
-                            ret.Add(_self[index].Clone());
+                            ret.Add(this[index].Clone());
                             break;
                         }
                     }
@@ -150,24 +178,24 @@ namespace MyAutoIt
             return ret;
         }
 
-        public static List<ImageTrainData> SplitTestData(this List<ImageTrainData> _self,int num)
+        public ImageTrainDataSet SplitTestData(int num)
         {
             Random rand = new Random();
             //List<ImageTrainData> ret = _self.GetRange(0, num);
             //_self.RemoveRange(0, num);
-            int numOutput = _self.GetNumOutput();
-            List<ImageTrainData> ret = new List<ImageTrainData>();
-            while(ret.Count() < num)
+            int numOutput = this.GetNumOutput();
+            ImageTrainDataSet ret = new ImageTrainDataSet();
+            while (ret.Count() < num)
             {
-                for(int i = 0; i < numOutput; i++)
+                for (int i = 0; i < numOutput; i++)
                 {
                     while (true)
                     {
-                        int index = rand.Next(_self.Count);
-                        if (_self[index].labelIndex == i)
+                        int index = rand.Next(this.Count);
+                        if (this[index].labelIndex == i)
                         {
-                            ret.Add(_self[index]);
-                            _self.RemoveAt(index);
+                            ret.Add(this[index]);
+                            this.RemoveAt(index);
                             break;
                         }
                     }
@@ -175,6 +203,50 @@ namespace MyAutoIt
             }
             return ret;
         }
+    }
+
+
+    public class TrainDataInfo
+    {
+        public int index;
+        public String label;
+        public int count;
+    }
+
+    public static class ImageTrainDataExtension
+    {
+        public static byte[] ToBytes(this Bitmap _self)
+        {
+            ImageConverter converter = new ImageConverter();
+            return (byte[])converter.ConvertTo(_self, typeof(byte[]));
+        }
+
+        public static byte[] MD5(this Bitmap _self)
+        {
+            MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
+            byte[] hash = md5.ComputeHash(_self.ToBytes());
+            return hash;
+        }
+
+        // White is color key
+        public static void ApplyMask(this Bitmap _self, Bitmap mask)
+        {
+            Graphics gx = Graphics.FromImage(_self);
+            ImageAttributes imageAttr = new ImageAttributes();
+            imageAttr.SetColorKey(Color.White, Color.White, ColorAdjustType.Default);
+            gx.DrawImage(mask, new Rectangle(0, 0, _self.Width, _self.Height), 0, 0, mask.Width, mask.Height, GraphicsUnit.Pixel, imageAttr);
+            gx.Dispose();
+        }
+
+       /* public static Bitmap[] GetBitmaps(this ImageFileData[] _self)
+        {
+            List<Bitmap> ret = new List<Bitmap>();
+            foreach (var a in _self)
+            {
+                ret.Add(a.image);
+            }
+            return ret.ToArray();
+        }*/
         public static void Show(this BagOfVisualWords bow)
         {
             // We can also check some statistics about the dataset:

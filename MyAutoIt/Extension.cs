@@ -27,5 +27,18 @@ namespace MyAutoIt
                 list[n] = value;
             }
         }
+        public static string ToHex(this byte[] _self)
+        {
+            char[] c = new char[_self.Length * 2];
+            int b;
+            for (int i = 0; i < _self.Length; i++)
+            {
+                b = _self[i] >> 4;
+                c[i * 2] = (char)(55 + b + (((b - 10) >> 31) & -7));
+                b = _self[i] & 0xF;
+                c[i * 2 + 1] = (char)(55 + b + (((b - 10) >> 31) & -7));
+            }
+            return new string(c);
+        }
     }
 }
