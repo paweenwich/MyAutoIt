@@ -55,6 +55,8 @@
             this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
             this.txtInput = new System.Windows.Forms.TextBox();
+            this.cmbFeature = new System.Windows.Forms.ComboBox();
+            this.captureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -175,7 +177,7 @@
             // reloadToolStripMenuItem
             // 
             this.reloadToolStripMenuItem.Name = "reloadToolStripMenuItem";
-            this.reloadToolStripMenuItem.Size = new System.Drawing.Size(131, 26);
+            this.reloadToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.reloadToolStripMenuItem.Text = "Reload";
             this.reloadToolStripMenuItem.Click += new System.EventHandler(this.reloadToolStripMenuItem_Click);
             // 
@@ -191,16 +193,17 @@
             // 
             this.autoToolStripMenuItem.CheckOnClick = true;
             this.autoToolStripMenuItem.Name = "autoToolStripMenuItem";
-            this.autoToolStripMenuItem.Size = new System.Drawing.Size(116, 26);
+            this.autoToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.autoToolStripMenuItem.Text = "Auto";
             this.autoToolStripMenuItem.Click += new System.EventHandler(this.autoToolStripMenuItem_Click);
             // 
             // toolsToolStripMenuItem
             // 
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.captureToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(57, 24);
             this.toolsToolStripMenuItem.Text = "Tools";
-            this.toolsToolStripMenuItem.Visible = false;
             // 
             // debugToolStripMenuItem
             // 
@@ -215,21 +218,21 @@
             // test1ToolStripMenuItem
             // 
             this.test1ToolStripMenuItem.Name = "test1ToolStripMenuItem";
-            this.test1ToolStripMenuItem.Size = new System.Drawing.Size(119, 26);
+            this.test1ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.test1ToolStripMenuItem.Text = "Test1";
             this.test1ToolStripMenuItem.Click += new System.EventHandler(this.test1ToolStripMenuItem_Click);
             // 
             // test2ToolStripMenuItem
             // 
             this.test2ToolStripMenuItem.Name = "test2ToolStripMenuItem";
-            this.test2ToolStripMenuItem.Size = new System.Drawing.Size(119, 26);
+            this.test2ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.test2ToolStripMenuItem.Text = "Test2";
             this.test2ToolStripMenuItem.Click += new System.EventHandler(this.test2ToolStripMenuItem_Click);
             // 
             // test3ToolStripMenuItem
             // 
             this.test3ToolStripMenuItem.Name = "test3ToolStripMenuItem";
-            this.test3ToolStripMenuItem.Size = new System.Drawing.Size(119, 26);
+            this.test3ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.test3ToolStripMenuItem.Text = "Test3";
             this.test3ToolStripMenuItem.Click += new System.EventHandler(this.test3ToolStripMenuItem_Click);
             // 
@@ -237,11 +240,12 @@
             // 
             this.cmbFolder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbFolder.FormattingEnabled = true;
-            this.cmbFolder.Location = new System.Drawing.Point(963, 4);
+            this.cmbFolder.Location = new System.Drawing.Point(363, 3);
             this.cmbFolder.Name = "cmbFolder";
             this.cmbFolder.Size = new System.Drawing.Size(121, 24);
             this.cmbFolder.TabIndex = 11;
             this.cmbFolder.TabStop = false;
+            this.cmbFolder.TextChanged += new System.EventHandler(this.cmbFolder_TextChanged);
             // 
             // timer1
             // 
@@ -270,11 +274,29 @@
             this.txtInput.TabIndex = 0;
             this.txtInput.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
             // 
+            // cmbFeature
+            // 
+            this.cmbFeature.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbFeature.FormattingEnabled = true;
+            this.cmbFeature.Location = new System.Drawing.Point(490, 2);
+            this.cmbFeature.Name = "cmbFeature";
+            this.cmbFeature.Size = new System.Drawing.Size(121, 24);
+            this.cmbFeature.TabIndex = 13;
+            this.cmbFeature.TabStop = false;
+            // 
+            // captureToolStripMenuItem
+            // 
+            this.captureToolStripMenuItem.Name = "captureToolStripMenuItem";
+            this.captureToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.captureToolStripMenuItem.Text = "Capture";
+            this.captureToolStripMenuItem.Click += new System.EventHandler(this.captureToolStripMenuItem_Click);
+            // 
             // AutoIt
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1084, 479);
+            this.Controls.Add(this.cmbFeature);
             this.Controls.Add(this.txtDebug);
             this.Controls.Add(this.cmbFolder);
             this.Controls.Add(this.menuStrip1);
@@ -319,5 +341,7 @@
         private System.Windows.Forms.Timer timer2;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.TextBox txtInput;
+        private System.Windows.Forms.ComboBox cmbFeature;
+        private System.Windows.Forms.ToolStripMenuItem captureToolStripMenuItem;
     }
 }

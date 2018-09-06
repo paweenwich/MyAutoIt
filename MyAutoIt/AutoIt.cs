@@ -26,72 +26,6 @@ using System.Windows.Forms;
 
 namespace MyAutoIt
 {
-    public interface IAutoBot
-    {
-        void log(String data);
-        void ClickAt(int x,int y);
-        void AddTask(String cmd,int time);
-        String CaptureScreen();
-    }
-
-    public interface ImageClassifier
-    {
-        int Evaluate(ImageTrainDataSet trainData);
-        String Classify(String fileName, String[] map);
-    }
-
-    public class BowImageClassifier : ImageClassifier
-    {
-        public dynamic bow;
-        public dynamic network;
-        public Bitmap mask;
-        public void Init(String bowFile,String networkFile, Bitmap mask)
-        {
-            bow = Accord.IO.Serializer.Load<BagOfVisualWords>(bowFile);
-            network = Accord.IO.Serializer.Load<ActivationNetwork>(networkFile);
-            this.mask = mask;
-        }
-        public int Evaluate(ImageTrainDataSet trainData)
-        {
-            double[][] features = trainData.GetFeature(bow, mask);
-            int[] labelIndexs = trainData.GetLabelIndexs();
-            String[] labels = trainData.GetLabels();
-            int errorCount = 0;
-            for (int i = 0; i < trainData.Count(); i++)
-            {
-                //double[] feature = bow.Transform(images[i]);
-                double[] answer = network.Compute(features[i]);
-
-                int expected = labelIndexs[i];
-                int actual; answer.Max(out actual);
-                if (actual != expected)
-                { 
-                    errorCount++;
-                }
-            }
-            return errorCount;
-
-        }
-
-        public String Classify(String fileName, String[] map)
-        {
-            Bitmap bmp = (Bitmap)Bitmap.FromFile(fileName);
-            bmp.ApplyMask(mask);
-            double[] features = bow.Transform(bmp);
-            double[] answer = network.Compute(features);
-            int actual;
-            answer.Max(out actual);
-            //logger.logStr("classifyImage " + map[actual] + " " + actual);
-            bmp.Dispose();
-            return map[actual];
-        }
-
-        public byte[] ComputeHash(ImageTrainDataSet trainData)
-        {
-            return trainData.MD5Feature(bow, mask);
-        }
-    }
-
 
     public partial class AutoIt : Form, IAutoBot
     {
@@ -106,6 +40,7 @@ namespace MyAutoIt
         ImageTrainDataSet testData;
         //String imagePath = Application.StartupPath + @"\Linage2\Main";
         BowImageClassifier imgClassifier;
+        Dictionary<String, SceneFeatureData> sceneFeatures = new Dictionary<string, SceneFeatureData>();
         //dynamic mainBow;
         //dynamic mainNetwork;
         int bowSize = 100;
@@ -127,7 +62,21 @@ namespace MyAutoIt
             {
 
                 configure = JsonConvert.DeserializeObject<AutoItConfigure>(File.ReadAllText(configFile));
-
+                //configure.features.Add("test",new SceneFeature());
+                foreach (var s in configure.features.Keys)
+                {
+                    foreach(var f in configure.features[s])
+                    {
+                        String fname = s + @"\" + f.name;
+                        sceneFeatures.Add(fname,new SceneFeatureData()
+                            {
+                                feature = f,
+                                trainData = GetAllTrainImageData(dataPath + @"\" + s + @"\Features\" + f.name,f.trainFolders)
+                        }
+                        );
+                        logger.logStr("add " + fname);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -143,13 +92,16 @@ namespace MyAutoIt
             Reload();
         }
 
-        public ImageTrainDataSet GetAllTrainImageData(String folder)
+        public ImageTrainDataSet GetAllTrainImageData(String folder, String[] subFolders, String imageFilter=null, String imageFilterOut=null )
         {
+            if(subFolders == null) subFolders = configure.trainFolders;
+            if (imageFilter == null) imageFilter = configure.imageFilter;
+            if (imageFilterOut == null) imageFilterOut = configure.imageFilterOut;
             ImageTrainDataSet ret = new ImageTrainDataSet();
-            for (int i = 0; i < configure.trainFolders.Length; i++)
+            for (int i = 0; i < subFolders.Length; i++)
             {
-                String folderName = folder + @"\" + configure.trainFolders[i];
-                ImageFileData[] images = GetImagesFromDir(folderName, configure.imageFilter, configure.imageFilterOut);
+                String folderName = folder + @"\" + subFolders[i];
+                ImageFileData[] images = GetImagesFromDir(folderName, imageFilter, imageFilterOut);
                 foreach (ImageFileData img in images)
                 {
                     //img.image.ApplyMask(mask);
@@ -157,7 +109,7 @@ namespace MyAutoIt
 
                             new ImageTrainData()
                             {
-                                label = configure.trainFolders[i],
+                                label = subFolders[i],
                                 labelIndex = i,
                                 //image = img.image,
                                 fileName = img.fileName,
@@ -313,7 +265,7 @@ namespace MyAutoIt
 
         private void loadTrainDataToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            trainData = GetAllTrainImageData(dataPath);
+            trainData = GetAllTrainImageData(dataPath, configure.trainFolders);
             trainData = trainData.BalanceData();
             trainData.Shuffle();
             testData = trainData.SplitTestData((int)(0.1* trainData.Count()));
@@ -335,7 +287,7 @@ namespace MyAutoIt
 
         private void trainToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            ImageTrainDataSet testDataSet = GetAllTrainImageData(testDataPath);
+            ImageTrainDataSet testDataSet = GetAllTrainImageData(testDataPath, configure.trainFolders);
             testDataSet.flgCache = true;
 
             int[] labelIndexs = trainData.GetLabelIndexs();
@@ -346,12 +298,16 @@ namespace MyAutoIt
             var function = new SigmoidFunction();
             logger.logStr("Start Training");
             bool flgFound = false;
-            while (flgFound == false)
+            int count = 0;
+            while ((flgFound == false) && (count < 100))
             {
+                count++;
                 var network = new ActivationNetwork(function, bow.NumberOfOutputs, 20, numOutput);
                 new NguyenWidrow(network).Randomize();
                 var teacher = new ParallelResilientBackpropagationLearning(network);
 
+                BowImageClassifier trainImgClassifier = new BowImageClassifier();
+                trainImgClassifier.Init(bow, network, mask);
                 //creat output
                 double[][] outputs = trainData.GetOutputs(numOutput);
                 double avgError = 10000.0;
@@ -360,7 +316,7 @@ namespace MyAutoIt
                 int errorCount = 0;
                 while ((errorCount < 3) && (avgError > 0.00001))
                 {
-                    Application.DoEvents();
+                    //Application.DoEvents();
                     double[] errors = new double[10];
                     for (int i = 0; i < 10; i++)
                     {
@@ -369,9 +325,9 @@ namespace MyAutoIt
                     avgError = errors.Average();
                     if (prevError > avgError)
                     {
-                        int trainError = imgClassifier.Evaluate(trainData);
-                        int testError = imgClassifier.Evaluate(testData);
-                        int testSetError = imgClassifier.Evaluate(testDataSet);
+                        int trainError = trainImgClassifier.Evaluate(trainData);
+                        int testError = trainImgClassifier.Evaluate(testData);
+                        int testSetError = trainImgClassifier.Evaluate(testDataSet);
                         logger.logStr(String.Format("{0} {1} {2} {3} {4} #{5}", avgError, prevError, trainError,testError, testSetError, errorCount));
                         prevError = avgError;
                         //save best error
@@ -395,36 +351,9 @@ namespace MyAutoIt
                     }
                     Application.DoEvents();
                 }
-                logger.logStr("Done " + bestError);
+                logger.logStr("Done " + bestError + " " + count);
             }
         }
-        /*
-        public int TestNetwork(ImageClassifier imgClassifier, ImageTrainDataSet trainData, bool flgSilence = false)
-        {
-            double[][] features = trainData.GetFeature(imgClassifier.bow, mask);
-            int[] labelIndexs = trainData.GetLabelIndexs();
-            String[] labels = trainData.GetLabels();
-            int errorCount = 0;
-            for (int i = 0; i < trainData.Count(); i++)
-            {
-                //double[] feature = bow.Transform(images[i]);
-                double[] answer = network.Compute(features[i]);
-
-                int expected = labelIndexs[i];
-                int actual; answer.Max(out actual);
-                if (actual == expected)
-                {
-                    //if (flgSilence == false) logger.logStr(trainData[i].ToString() + " " + actual);
-                }
-                else
-                {
-                    if (flgSilence == false) logger.logError(trainData[i].ToString() + " " + actual);
-                    errorCount++;
-                }
-            }
-            return errorCount;
-        }*/
-
         public String classifyImage(String fileName, String[] map)
         {
             return imgClassifier.Classify(fileName, map);
@@ -452,7 +381,7 @@ namespace MyAutoIt
 
         private void testWithTestSetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ImageTrainDataSet testDataSet = GetAllTrainImageData(testDataPath);
+            ImageTrainDataSet testDataSet = GetAllTrainImageData(testDataPath, configure.trainFolders);
             testDataSet.flgCache = true;
             byte[] hash = imgClassifier.ComputeHash(testDataSet);
             logger.logStr(hash.ToHex());
@@ -486,6 +415,64 @@ namespace MyAutoIt
                 }).Start();
             }
         }
+
+        private void cmbFolder_TextUpdate(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cmbFolder_TextChanged(object sender, EventArgs e)
+        {
+            if (configure.features.ContainsKey(cmbFolder.Text))
+            {
+                cmbFeature.Items.Clear();
+                foreach(String key in configure.features.Keys)
+                {
+                    foreach (SceneFeature data in configure.features[key])
+                    {
+                        foreach (String folder in data.trainFolders) {
+                            cmbFeature.Items.Add(data.name + @"\" + folder);
+                        }
+                    }
+                }
+            }else
+            {
+                cmbFeature.Items.Clear();
+                cmbFeature.Text = "";
+            }
+        }
+
+        private void captureToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(cmbFolder.Text != "")
+            {
+                String fileName = CaptureScreen();
+                String outPath = dataPath + @"\" + cmbFolder.Text;
+                if (cmbFeature.Text != "")
+                {
+                    outPath += @"\Features\" + cmbFeature.Text;
+                }
+                String outFile = outPath + @"\" + Path.GetRandomFileName().Replace(".", "") + ".png";
+                File.Copy(fileName, outFile);
+                File.Delete(fileName);
+                logger.logStr(outFile);
+            }
+        }
+    }
+
+
+    public class SceneFeature
+    {
+        public String name = "";
+        public String[] trainFolders = new string[] { };
+        public Rectangle area = new Rectangle();
+    }
+
+    public class SceneFeatureData
+    {
+        public SceneFeature feature;
+        public ImageTrainDataSet trainData;
+        public BowImageClassifier classifier;
     }
 
 
@@ -496,7 +483,80 @@ namespace MyAutoIt
         public String imageFilterOut = "mask.png";
         public Rectangle[] areas = new Rectangle[] {
             new Rectangle(0,0,1280,720)
-        }; 
+        };
+        public Dictionary<String, List<SceneFeature>> features = new Dictionary<string, List<SceneFeature>>();
     }
+
+    public interface IAutoBot
+    {
+        void log(String data);
+        void ClickAt(int x, int y);
+        void AddTask(String cmd, int time);
+        String CaptureScreen();
+    }
+
+    public interface ImageClassifier
+    {
+        int Evaluate(ImageTrainDataSet trainData);
+        String Classify(String fileName, String[] map);
+    }
+    public class BowImageClassifier : ImageClassifier
+    {
+        public dynamic bow;
+        public dynamic network;
+        public Bitmap mask;
+        public void Init(String bowFile, String networkFile, Bitmap mask)
+        {
+            bow = Accord.IO.Serializer.Load<BagOfVisualWords>(bowFile);
+            network = Accord.IO.Serializer.Load<ActivationNetwork>(networkFile);
+            this.mask = mask;
+        }
+        public void Init(dynamic bow, dynamic network, Bitmap mask)
+        {
+            this.bow = bow;
+            this.network = network;
+            this.mask = mask;
+        }
+        public int Evaluate(ImageTrainDataSet trainData)
+        {
+            double[][] features = trainData.GetFeature(bow, mask);
+            int[] labelIndexs = trainData.GetLabelIndexs();
+            String[] labels = trainData.GetLabels();
+            int errorCount = 0;
+            for (int i = 0; i < trainData.Count(); i++)
+            {
+                //double[] feature = bow.Transform(images[i]);
+                double[] answer = network.Compute(features[i]);
+
+                int expected = labelIndexs[i];
+                int actual; answer.Max(out actual);
+                if (actual != expected)
+                {
+                    errorCount++;
+                }
+            }
+            return errorCount;
+
+        }
+
+        public String Classify(String fileName, String[] map)
+        {
+            Bitmap bmp = (Bitmap)Bitmap.FromFile(fileName);
+            bmp.ApplyMask(mask);
+            double[] features = bow.Transform(bmp);
+            double[] answer = network.Compute(features);
+            int actual;
+            answer.Max(out actual);
+            //logger.logStr("classifyImage " + map[actual] + " " + actual);
+            bmp.Dispose();
+            return map[actual];
+        }
+
+        public byte[] ComputeHash(ImageTrainDataSet trainData)
+        {
+            return trainData.MD5Feature(bow, mask);
+        }
+    }
+
 
 }
