@@ -3,6 +3,7 @@ using Accord.Neuro;
 using Accord.Neuro.Learning;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -43,6 +44,9 @@ namespace MyAutoIt
                 {
                     logger.logError("FeatureDetector: Train " + scenefeatureData.feature.name + " fail");
                     return false;
+                }else
+                {
+                    logger.logStr("FeatureDetector: Train " + scenefeatureData.feature.name + " success");
                 }
             }
             return true;
@@ -50,23 +54,28 @@ namespace MyAutoIt
         public bool TrainSceneFeature(SceneFeatureData scenefeatureData)
         {
             //Create bow 
+            Bitmap mask = Utils.CreateMaskBitmap(new Size(1280, 720), new Rectangle[] { scenefeatureData.feature.area });
             var bow = BagOfVisualWords.Create(numberOfWords: scenefeatureData.feature.bowSize);
-            var images = scenefeatureData.trainData.GetBitmaps();
+            var images = scenefeatureData.trainData.GetBitmaps(mask);
             bow.Learn(images);
             Accord.IO.Serializer.Save(bow, path + @"\" + scenefeatureData.feature.name + String.Format(@"\train-{0}.bow", scenefeatureData.feature.bowSize));
+            bow.Show();
             return Train(bow, scenefeatureData);
         }
 
         private bool Train(dynamic bow, SceneFeatureData scenefeatureData)
         {
+            Bitmap mask = Utils.CreateMaskBitmap(new Size(1280, 720), new Rectangle[] { scenefeatureData.feature.area });
+            mask.Save("mask.png");
             var trainData = scenefeatureData.trainData;
             int[] labelIndexs = trainData.GetLabelIndexs();
             String[] labels = trainData.GetLabels();
-            double[][] features = trainData.GetFeature(bow);
+            double[][] features = trainData.GetFeature(bow,mask);
             int numOutput = trainData.GetNumOutput();
             var function = new SigmoidFunction();
             bool flgFound = false;
             int count = 0;
+
             while ((flgFound == false) && (count < 100))
             {
                 count++;
@@ -75,7 +84,7 @@ namespace MyAutoIt
                 var teacher = new ParallelResilientBackpropagationLearning(network);
 
                 BowImageClassifier trainImgClassifier = new BowImageClassifier();
-                trainImgClassifier.Init(bow, network);
+                trainImgClassifier.Init(bow, network,mask);
                 //creat output
                 double[][] outputs = trainData.GetOutputs(numOutput);
                 double avgError = 10000.0;
@@ -107,6 +116,7 @@ namespace MyAutoIt
                         if (trainError /*+ testError + testSetError*/ == 0)
                         {
                             Accord.IO.Serializer.Save(network, path + @"\" + scenefeatureData.feature.name + String.Format(@"\train-{0}.net", bow.NumberOfOutputs));
+                            logger.logStr("Done " + bestError + " " + trainError);
                             return true;
                         }
                     }

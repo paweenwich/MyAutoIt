@@ -63,7 +63,7 @@ namespace MyAutoIt
             return hash;
         }
 
-        public double[][] GetFeature(dynamic bow, Bitmap mask = null)
+        public double[][] GetFeature(dynamic bow, Bitmap mask)
         {
             if (features == null)
             {
@@ -93,7 +93,7 @@ namespace MyAutoIt
             }
             return features;
         }
-        public Bitmap[] GetBitmaps(Bitmap mask = null)
+        public Bitmap[] GetBitmaps(Bitmap mask)
         {
             List<Bitmap> ret = new List<Bitmap>();
             foreach (var a in this)

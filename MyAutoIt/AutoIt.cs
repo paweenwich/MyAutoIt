@@ -459,13 +459,13 @@ namespace MyAutoIt
         public dynamic bow;
         public dynamic network;
         public Bitmap mask;
-        public void Init(String bowFile, String networkFile, Bitmap mask=null)
+        public void Init(String bowFile, String networkFile, Bitmap mask)
         {
             bow = Accord.IO.Serializer.Load<BagOfVisualWords>(bowFile);
             network = Accord.IO.Serializer.Load<ActivationNetwork>(networkFile);
             this.mask = mask;
         }
-        public void Init(dynamic bow, dynamic network, Bitmap mask=null)
+        public void Init(dynamic bow, dynamic network, Bitmap mask)
         {
             this.bow = bow;
             this.network = network;

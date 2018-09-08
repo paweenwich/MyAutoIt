@@ -38,7 +38,25 @@
           "trainFolders": ["1","2","3","4","5"],
           "area": "1230, 665, 49, 50",
 		  "bowSize": 10
-        }
+        },
+		{
+          "name": "MonsterType",
+          "trainFolders": ["Dragon","Demon","Magic","Undead","Monster","Animal","Human"],
+          "area": "432, 18, 45, 45",
+		  "bowSize": 20
+        },
+		{
+          "name": "MonsterClass",
+          "trainFolders": ["Normal","Elite"],
+          "area": "495, 11, 200, 32",
+		  "bowSize": 40
+        },
+		{
+			"name": "Action",
+			"trainFolders": ["Auto","NotAuto"],
+			"area": "843, 655, 67, 60",
+			"bowSize": 20
+		}
     ]
   }
 
