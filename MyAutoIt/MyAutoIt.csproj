@@ -187,6 +187,7 @@
     <Compile Include="CENet.cs" />
     <Compile Include="CVUtil.cs" />
     <Compile Include="Extension.cs" />
+    <Compile Include="FeatureDetector.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

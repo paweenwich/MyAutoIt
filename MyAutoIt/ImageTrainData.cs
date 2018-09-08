@@ -46,8 +46,11 @@ namespace MyAutoIt
         {
             HashAlgorithm hasher = new MD5CryptoServiceProvider();
             hasher.Initialize();
-            byte[] maskData = mask.ToBytes();
-            hasher.TransformBlock(maskData, 0, maskData.Length, null, 0);
+            if (mask != null)
+            {
+                byte[] maskData = mask.ToBytes();
+                hasher.TransformBlock(maskData, 0, maskData.Length, null, 0);
+            }
             foreach (var a in this)
             {
                 byte[] bytes = System.Text.Encoding.UTF8.GetBytes(a.fileName);
@@ -60,7 +63,7 @@ namespace MyAutoIt
             return hash;
         }
 
-        public double[][] GetFeature(dynamic bow, Bitmap mask)
+        public double[][] GetFeature(dynamic bow, Bitmap mask = null)
         {
             if (features == null)
             {
@@ -90,13 +93,16 @@ namespace MyAutoIt
             }
             return features;
         }
-        public Bitmap[] GetBitmaps(Bitmap mask)
+        public Bitmap[] GetBitmaps(Bitmap mask = null)
         {
             List<Bitmap> ret = new List<Bitmap>();
             foreach (var a in this)
             {
                 Bitmap bmp = (Bitmap)Bitmap.FromFile(a.fileName);
-                bmp.ApplyMask(mask);
+                if (mask != null)
+                {
+                    bmp.ApplyMask(mask);
+                }
                 ret.Add(bmp);
             }
             return ret.ToArray();

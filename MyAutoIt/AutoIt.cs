@@ -71,7 +71,7 @@ namespace MyAutoIt
                         sceneFeatures.Add(fname,new SceneFeatureData()
                             {
                                 feature = f,
-                                trainData = GetAllTrainImageData(dataPath + @"\" + s + @"\Features\" + f.name,f.trainFolders)
+                                trainData = FeatureDetector.GetAllTrainImageData(dataPath + @"\" + s + @"\Features\" + f.name,f.trainFolders)
                         }
                         );
                         logger.logStr("add " + fname);
@@ -91,57 +91,6 @@ namespace MyAutoIt
             }
             Reload();
         }
-
-        public ImageTrainDataSet GetAllTrainImageData(String folder, String[] subFolders, String imageFilter=null, String imageFilterOut=null )
-        {
-            if(subFolders == null) subFolders = configure.trainFolders;
-            if (imageFilter == null) imageFilter = configure.imageFilter;
-            if (imageFilterOut == null) imageFilterOut = configure.imageFilterOut;
-            ImageTrainDataSet ret = new ImageTrainDataSet();
-            for (int i = 0; i < subFolders.Length; i++)
-            {
-                String folderName = folder + @"\" + subFolders[i];
-                ImageFileData[] images = GetImagesFromDir(folderName, imageFilter, imageFilterOut);
-                foreach (ImageFileData img in images)
-                {
-                    //img.image.ApplyMask(mask);
-                    ret.Add(
-
-                            new ImageTrainData()
-                            {
-                                label = subFolders[i],
-                                labelIndex = i,
-                                //image = img.image,
-                                fileName = img.fileName,
-                            }
-                    );
-                }
-            }
-            return ret;
-        }
-
-        public ImageFileData[] GetImagesFromDir(String folder, String filter = "*.png", String filterOut = "mask.png")
-        {
-            List<ImageFileData> ret = new List<ImageFileData>();
-            DirectoryInfo d = new DirectoryInfo(folder);
-            if (d.Exists)
-            {
-                FileInfo[] Files = d.GetFiles(filter);
-                foreach (FileInfo file in Files)
-                {
-                    //Console.WriteLine(file.FullName);
-                    if (file.Name.Equals(filterOut, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        logger.logStr("Skip " + file.FullName);
-                        continue;
-                    }
-                    //Bitmap bmp = (Bitmap)Bitmap.FromFile(file.FullName);
-                    ret.Add(new ImageFileData() { fileName = file.FullName });
-                }
-            }
-            return ret.ToArray();
-        }
-
         public void Reload()
         {
             lua = new Lua();
@@ -224,6 +173,10 @@ namespace MyAutoIt
 
         private void test1ToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            FeatureDetector f = new FeatureDetector();
+            f.Init(@"D:\kwang\Csharp\MyAutoIt\MyAutoIt\bin\Debug\Linage2\Main\Features",configure.features["Main"]);
+            f.LoadFeatureTrainData();
+            f.Train();
         }
 
         private void test2ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -265,7 +218,7 @@ namespace MyAutoIt
 
         private void loadTrainDataToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            trainData = GetAllTrainImageData(dataPath, configure.trainFolders);
+            trainData = FeatureDetector.GetAllTrainImageData(dataPath, configure.trainFolders);
             trainData = trainData.BalanceData();
             trainData.Shuffle();
             testData = trainData.SplitTestData((int)(0.1* trainData.Count()));
@@ -287,7 +240,7 @@ namespace MyAutoIt
 
         private void trainToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            ImageTrainDataSet testDataSet = GetAllTrainImageData(testDataPath, configure.trainFolders);
+            ImageTrainDataSet testDataSet = FeatureDetector.GetAllTrainImageData(testDataPath, configure.trainFolders);
             testDataSet.flgCache = true;
 
             int[] labelIndexs = trainData.GetLabelIndexs();
@@ -381,7 +334,7 @@ namespace MyAutoIt
 
         private void testWithTestSetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ImageTrainDataSet testDataSet = GetAllTrainImageData(testDataPath, configure.trainFolders);
+            ImageTrainDataSet testDataSet = FeatureDetector.GetAllTrainImageData(testDataPath, configure.trainFolders);
             testDataSet.flgCache = true;
             byte[] hash = imgClassifier.ComputeHash(testDataSet);
             logger.logStr(hash.ToHex());
@@ -466,6 +419,7 @@ namespace MyAutoIt
         public String name = "";
         public String[] trainFolders = new string[] { };
         public Rectangle area = new Rectangle();
+        public int bowSize = 10;
     }
 
     public class SceneFeatureData
@@ -505,13 +459,13 @@ namespace MyAutoIt
         public dynamic bow;
         public dynamic network;
         public Bitmap mask;
-        public void Init(String bowFile, String networkFile, Bitmap mask)
+        public void Init(String bowFile, String networkFile, Bitmap mask=null)
         {
             bow = Accord.IO.Serializer.Load<BagOfVisualWords>(bowFile);
             network = Accord.IO.Serializer.Load<ActivationNetwork>(networkFile);
             this.mask = mask;
         }
-        public void Init(dynamic bow, dynamic network, Bitmap mask)
+        public void Init(dynamic bow, dynamic network, Bitmap mask=null)
         {
             this.bow = bow;
             this.network = network;
@@ -542,7 +496,10 @@ namespace MyAutoIt
         public String Classify(String fileName, String[] map)
         {
             Bitmap bmp = (Bitmap)Bitmap.FromFile(fileName);
-            bmp.ApplyMask(mask);
+            if (mask != null)
+            {
+                bmp.ApplyMask(mask);
+            }
             double[] features = bow.Transform(bmp);
             double[] answer = network.Compute(features);
             int actual;
