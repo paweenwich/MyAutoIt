@@ -66,7 +66,7 @@ namespace MyAutoIt
         private bool Train(dynamic bow, SceneFeatureData scenefeatureData)
         {
             Bitmap mask = Utils.CreateMaskBitmap(new Size(1280, 720), new Rectangle[] { scenefeatureData.feature.area });
-            mask.Save("mask.png");
+            mask.Save(scenefeatureData.feature.name + "-mask.png");
             var trainData = scenefeatureData.trainData;
             int[] labelIndexs = trainData.GetLabelIndexs();
             String[] labels = trainData.GetLabels();

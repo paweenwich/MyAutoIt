@@ -41,13 +41,13 @@
         },
 		{
           "name": "MonsterType",
-          "trainFolders": ["Dragon","Demon","Magic","Undead","Monster","Animal","Human"],
+          "trainFolders": ["Dragon","Demon","Magic","Undead","Monster","Animal","Human","None"],
           "area": "432, 18, 45, 45",
 		  "bowSize": 20
         },
 		{
           "name": "MonsterClass",
-          "trainFolders": ["Normal","Elite"],
+          "trainFolders": ["Normal","Elite","None"],
           "area": "495, 11, 200, 32",
 		  "bowSize": 40
         },
